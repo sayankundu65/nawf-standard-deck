@@ -1,5 +1,7 @@
 "use client";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Maximize2, X } from "lucide-react";
 
 const designSections = [
   {
@@ -58,17 +60,78 @@ function ItemCard({ label, index }: { label: string; index: number }) {
   );
 }
 
-function DesignPhotoBlock({ index }: { index: number }) {
+function DesignPhotoBlock({ index, imageUrl }: { index: number; imageUrl?: string }) {
+  const [isFull, setIsFull] = useState(false);
   return (
-    <div className="aspect-[4/3] rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all flex-shrink-0 w-[260px] md:w-[380px]">
-      <span className="text-[#7a8c7f]/30 font-heading text-xs uppercase tracking-widest group-hover:text-[#7a8c7f]/60 transition-colors">
-        DESIGN {String(index + 1).padStart(2, "0")}
-      </span>
+    <div className="relative aspect-[4/3] rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all flex-shrink-0 w-[260px] md:w-[380px] overflow-hidden">
+      {imageUrl ? (
+        <>
+          <img src={imageUrl} alt={`Design ${index + 1}`} className="w-full h-full object-cover" />
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
+            className="absolute top-2 right-2 p-2 rounded-full bg-[#080f0c]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+          >
+            <Maximize2 size={16} />
+          </button>
+          {isFull && (
+            <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-4" onClick={() => setIsFull(false)}>
+              <img src={imageUrl} alt={`Design ${index + 1} Fullscreen`} className="max-w-full max-h-full object-contain rounded-lg" />
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsFull(false); }}
+                className="absolute top-6 right-6 p-3 rounded-full bg-[#080f0c]/80 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <span className="text-[#7a8c7f]/30 font-heading text-xs uppercase tracking-widest group-hover:text-[#7a8c7f]/60 transition-colors">
+          DESIGN {String(index + 1).padStart(2, "0")}
+        </span>
+      )}
     </div>
   );
 }
 
 export function DesignStrategySection() {
+  const designPhotoUrls = [
+    "https://lh3.googleusercontent.com/d/1O_BNW1vxheB0Dk91n9ovIcAWAvPf1I1T",
+    "https://lh3.googleusercontent.com/d/1EdBX-iNkXMU0Qea9bDNoEw29hYgwtwKg",
+    "https://lh3.googleusercontent.com/d/1Yzm8bRXY-ag2oIqgzTofgf66ZLAhSAEj",
+    "https://lh3.googleusercontent.com/d/15v7neYO5cEGNFvOBsJix6cLZpahuNTIa",
+    "https://lh3.googleusercontent.com/d/1xs1b_WQQugxDGUEqHnjWDtKePvydFfqN",
+    "https://lh3.googleusercontent.com/d/1AY3JiEQh7akvlBzSdYHTZ2soPxpH_wz1",
+    "https://lh3.googleusercontent.com/d/1WRKoEy1vkmKsvClZb9jFOaXHZ2cm5a9s",
+    "https://lh3.googleusercontent.com/d/1KIkKtcne-w6ft06Y2P8wUUDVb3xBGdyl",
+    "https://lh3.googleusercontent.com/d/1j80rdAqfrNF8jI1vdKRNJHwb7ggZjkVh",
+    "https://lh3.googleusercontent.com/d/1TmhbUbg8oFazqLOx5r0_BV0ub2YclnsX",
+    "https://lh3.googleusercontent.com/d/1nCAM8l2OOtkdrqkvfE09JD8FaLPiPY67",
+    "https://lh3.googleusercontent.com/d/1NeUebPC0gbkIc91NLeUIhy-gZF44m5t1",
+    "https://lh3.googleusercontent.com/d/1JkTPzNPA2Xs9Xy_dBqSfOojI41ZFuw6p",
+    "https://lh3.googleusercontent.com/d/1iT8G5PBcAXVSgsbl_OqrZRD0vBoqVQi7",
+    "https://lh3.googleusercontent.com/d/1G_MDO9ZgBTSvkjhhFFE7JWub_oJP3ejj",
+    "https://lh3.googleusercontent.com/d/1U9J6K7DR_zuIA97DKflPqpa29Xc8Bbv7",
+    "https://lh3.googleusercontent.com/d/1ZeTEmikxnlt_iyUeHQxV5JPKh-r8R6Of",
+    "https://lh3.googleusercontent.com/d/1wz70XvkcrWfgxYEsGcDM9BX-Fnhr4vAx",
+    "https://lh3.googleusercontent.com/d/14ygQBhMJgl1SfCV216_5A_J15pklq3ld",
+    "https://lh3.googleusercontent.com/d/1e9PnjrNhEXAIhg4VglWjpyQRorObvoI_",
+    "https://lh3.googleusercontent.com/d/1Bb__1QsMQ5mySOWgyCXC09ge3yh5exHt",
+    "https://lh3.googleusercontent.com/d/16kEHSU0rtTtgztd4jCQ_qHvDUmO9ZBGw",
+    "https://lh3.googleusercontent.com/d/1AP5oo4PEIgcdiboRUEfdQ4-9NAqTF89_",
+    "https://lh3.googleusercontent.com/d/1Xx3-KBbVdsud64eV7EiZVMCbvjAo63ob",
+    "https://lh3.googleusercontent.com/d/14GE5-AtwV_UCIHx40Wgxoivsxgrz6Nbk",
+    "https://lh3.googleusercontent.com/d/1XEcNZL-RqiX7706pgzr9wEuEvnyD88yX",
+    "https://lh3.googleusercontent.com/d/1YTk15Ydo3hdN3cVE_4y9BMQNxbTgq5ET",
+    "https://lh3.googleusercontent.com/d/12mvRnJhmk77OabhB2aggFvl8NXzKSfB1",
+    "https://lh3.googleusercontent.com/d/1NrUi-E_b5-VT5qRvVA0xymp2HgWHKoFI",
+    "https://lh3.googleusercontent.com/d/1PmCfdhdjQ9CRuBLwboXaVtIvA2FPgu_l",
+    "https://lh3.googleusercontent.com/d/1t2dzkOYFCFJVWfJGhcyLPGbi_KPrcsMl",
+    "https://lh3.googleusercontent.com/d/1GkAIJeHQGxk8Hl4ftFvy1sIM9dTrc8az",
+    "https://lh3.googleusercontent.com/d/1yA4BiGaIrDGHCTB5iz_nWQss6B66DmUe",
+    "https://lh3.googleusercontent.com/d/1Db-cbd7Hp02xm6vdMmNy1Ri7K4RotmDz"
+  ];
+
   return (
     <section id="design-strategy" className="relative py-28 md:py-36 bg-[#0a1510] border-t border-white/5 overflow-hidden">
 
@@ -111,20 +174,20 @@ export function DesignStrategySection() {
                 {sec.items.map((item, i) => <ItemCard key={i} label={item} index={i} />)}
               </div>
             </div>
-
-            {/* Full-bleed photo carousel */}
-            <div className="w-screen relative left-1/2 right-1/2 -mx-[50vw]">
-              <div
-                className="flex gap-5 overflow-x-auto px-6 md:px-24 pb-6"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-              >
-                {Array(sec.photoCount).fill(0).map((_, i) => (
-                  <DesignPhotoBlock key={i} index={i} />
-                ))}
-              </div>
-            </div>
           </div>
         ))}
+      </div>
+
+      {/* Combined Full-bleed photo carousel */}
+      <div className="mt-16 w-screen relative left-1/2 right-1/2 -mx-[50vw]">
+        <div
+          className="flex gap-5 overflow-x-auto px-6 md:px-24 pb-6"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {designPhotoUrls.map((url, i) => (
+            <DesignPhotoBlock key={i} index={i} imageUrl={url} />
+          ))}
+        </div>
       </div>
     </section>
   );

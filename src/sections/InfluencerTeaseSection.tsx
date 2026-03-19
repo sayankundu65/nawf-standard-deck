@@ -365,18 +365,7 @@ export function InfluencerTeaseSection() {
               100+ Real Creators<br />With an Overlap Mindset
             </h3>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl">
-            {[0,1].map(i => (
-              <div key={i} className="aspect-[9/16] bg-[#0e1a14] border border-white/5 rounded-2xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-all">
-                <span className="text-[10px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest">REELS</span>
-              </div>
-            ))}
-            {[0,1].map(i => (
-              <div key={i} className="aspect-[4/5] bg-[#0e1a14] border border-white/5 rounded-2xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-all">
-                <span className="text-[10px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest">PHOTO</span>
-              </div>
-            ))}
-          </div>
+
         </motion.div>
 
         {/* Custom Brand AI Creators */}
