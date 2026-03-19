@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Volume2, VolumeX, RotateCcw } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, RotateCcw, Maximize2, X } from "lucide-react";
 
 const modelCapabilities = [
   "Face consistency model training", "Skin tone precision", "Fashion style bank",
@@ -100,10 +100,37 @@ function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: st
   );
 }
 
+function ProfilePhotoItem({ imageUrl, index }: { imageUrl: string, index: number }) {
+  const [isFull, setIsFull] = useState(false);
+  return (
+    <div className="relative aspect-square bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center overflow-hidden group">
+      <img src={imageUrl} alt={`Photo ${index}`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+      <button
+        onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
+        className="absolute top-2 right-2 p-1.5 rounded-full bg-[#080f0c]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+      >
+        <Maximize2 size={14} />
+      </button>
+
+      {isFull && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-4" onClick={() => setIsFull(false)}>
+          <img src={imageUrl} alt={`Photo ${index} Fullscreen`} className="max-w-full max-h-full object-contain rounded-lg" />
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsFull(false); }}
+            className="absolute top-6 right-6 p-3 rounded-full bg-[#080f0c]/80 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProfileCard({
-  name, dob, age, city, height, zodiac, side, videoIds = []
+  name, dob, age, city, height, zodiac, side, videoIds = [], photoUrls = []
 }: {
-  name: string; dob: string; age: string; city: string; height: string; zodiac: string; side?: "left" | "right"; videoIds?: string[];
+  name: string; dob: string; age: string; city: string; height: string; zodiac: string; side?: "left" | "right"; videoIds?: string[]; photoUrls?: string[];
 }) {
   return (
     <motion.div
@@ -119,8 +146,12 @@ function ProfileCard({
       </div>
 
       {/* Avatar placeholder */}
-      <div className="flex-shrink-0 w-full lg:w-52 aspect-[3/4] lg:aspect-auto lg:h-64 bg-[#111c16] border border-white/8 rounded-2xl flex items-center justify-center">
-        <span className="font-heading font-black text-[#7a8c7f]/30 text-lg uppercase">{name}</span>
+      <div className="flex-shrink-0 w-full lg:w-52 aspect-[3/4] lg:aspect-auto lg:h-64 bg-[#111c16] border border-white/8 rounded-2xl flex items-center justify-center overflow-hidden">
+        {photoUrls.length > 0 ? (
+          <img src={photoUrls[0]} alt={`${name} avatar`} className="w-full h-full object-cover" />
+        ) : (
+          <span className="font-heading font-black text-[#7a8c7f]/30 text-lg uppercase">{name}</span>
+        )}
       </div>
 
       {/* Info */}
@@ -152,13 +183,19 @@ function ProfileCard({
             )}
           </div>
 
-          {/* 8 Photos */}
-          <div className="grid grid-cols-8 gap-2">
-            {[0,1,2,3,4,5,6,7].map(i => (
-              <div key={i} className="aspect-square bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-colors group">
-                <span className="text-[7px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest group-hover:text-[#7a8c7f]/70">PHOTO</span>
-              </div>
-            ))}
+          {/* Photos */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            {photoUrls.length > 0 ? (
+              photoUrls.map((url, i) => (
+                <ProfilePhotoItem key={i} index={i} imageUrl={url} />
+              ))
+            ) : (
+              [0,1,2,3,4,5,6,7].map(i => (
+                <div key={i} className="aspect-square bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-colors group">
+                  <span className="text-[7px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest group-hover:text-[#7a8c7f]/70">PHOTO</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -214,6 +251,36 @@ export function InfluencerTeaseSection() {
             "PH4JRov_KZk",
             "tvWCB82BKGk"
           ]}
+          photoUrls={[
+            "https://lh3.googleusercontent.com/d/1AFWaibrL09yASCRxjmISWzaFARhN1p3a",
+            "https://lh3.googleusercontent.com/d/1dGr5DCcMiELZeP1zjO0nQ1kxpRqZtWW9",
+            "https://lh3.googleusercontent.com/d/1_5907zw-j1sPYHqPYEgO2ViORtKDNj_x",
+            "https://lh3.googleusercontent.com/d/1PadOd02v6zXwDG5wwTfw7YIJjFklz5Lj",
+            "https://lh3.googleusercontent.com/d/1tPM04EGODgTq5pEnD_Sv0bc4I-Py2wT7",
+            "https://lh3.googleusercontent.com/d/1j007rKSn2J4ffLfQr48svwPIDLGdHTM1",
+            "https://lh3.googleusercontent.com/d/1gb6RpOMLCiD0zzSEk3m6VIqg0k1OLE6q",
+            "https://lh3.googleusercontent.com/d/1Wgh0Tt2yHys9hvfTrTWsp9UegVpt6vOn",
+            "https://lh3.googleusercontent.com/d/1_W4fs9np16rJFxZPSQ6GCR-2w62MNQbH",
+            "https://lh3.googleusercontent.com/d/18iZ3PuZ8bUzQHnhp14vmLBzpc7REemsa",
+            "https://lh3.googleusercontent.com/d/1q7A7ZmrlTmvTh50PZWUb6zudmajNES-w",
+            "https://lh3.googleusercontent.com/d/1VAK1BhbwKKlSwnJB7zoQWl-l0D-eQeA0",
+            "https://lh3.googleusercontent.com/d/1nwF0J96eQnfM4gxgF_0_rF-VnXx-fFLd",
+            "https://lh3.googleusercontent.com/d/1bL4-IvK9qRmuCQnffviqY9HqDw0KRwCG",
+            "https://lh3.googleusercontent.com/d/1IBFq_UJACM7Gxie7ghgtV5YPOJdslQbi",
+            "https://lh3.googleusercontent.com/d/1NNWJMPTuXxCH1GDhtunUsm3ssiyodXPO",
+            "https://lh3.googleusercontent.com/d/1jslj4eUjTibPAi1RldMp0PwmSeOz5gHb",
+            "https://lh3.googleusercontent.com/d/1cHUJsbyu4iu_8E6brElQrymLXmBOkbX2",
+            "https://lh3.googleusercontent.com/d/1gLEqofyNxBA2gl2OPLEt9or4rPI60qW_",
+            "https://lh3.googleusercontent.com/d/1BbhAQ8F4_UxCO9W4Vb8tg5k1aNBhAzq8",
+            "https://lh3.googleusercontent.com/d/18vDQnkXFm7JK7iDmHJ2NplFhEPH4nJHT",
+            "https://lh3.googleusercontent.com/d/1Vk5dCatq9nI3_9Gr0TLwt4jwKo19YkFE",
+            "https://lh3.googleusercontent.com/d/1OyDLyB927lT67MmUU9pIAh7F6Hok_UkH",
+            "https://lh3.googleusercontent.com/d/1sgLsnsOqUNkiURZ3gcfhoWywHMTkXcgv",
+            "https://lh3.googleusercontent.com/d/1cD7btDWOdfzo5iaEOxc4GYiMgmxQDTx6",
+            "https://lh3.googleusercontent.com/d/1nWF6HaYRE66DXXvGifmrceQlqpOWEQHq",
+            "https://lh3.googleusercontent.com/d/1KX5-_WqSFdWCFhJBRs5dGvVdtJWY-7A-",
+            "https://lh3.googleusercontent.com/d/1tOakCFktZbg5OnAloHLmUZqoBP4-_Fl_"
+          ]}
         />
         <ProfileCard 
           name="DHAIRYA" 
@@ -229,6 +296,37 @@ export function InfluencerTeaseSection() {
             "RZUNg3ClvPc",
             "to_ArTiVyx8",
             "UoFRkvSYMb8"
+          ]}
+          photoUrls={[
+            "https://lh3.googleusercontent.com/d/1AKbY7BbDWBs-EbEwRZnNK631ihc_dYly",
+            "https://lh3.googleusercontent.com/d/1Aw-ghqjSQWYNJsXLFzB91ojzCcZC8RRW",
+            "https://lh3.googleusercontent.com/d/1NHphjXS6tOfh-6ZGrg1I1DiuguI9N1bj",
+            "https://lh3.googleusercontent.com/d/10V6eM6tqHIFkBDq7rc0EfQ1XuioBzDkV",
+            "https://lh3.googleusercontent.com/d/1qd5d3SpAlcYQxVSsRnZwMsQAt8J8SSNz",
+            "https://lh3.googleusercontent.com/d/1Z-TrOzEVkOhMCke6cqjRMm0tFtpJBHem",
+            "https://lh3.googleusercontent.com/d/1UAxsVnZRG7LcxfBVxBP7M59iiG18H9YI",
+            "https://lh3.googleusercontent.com/d/1cH4sbUp8w4YG3aVyXaRuvLKdIJnKAW_w",
+            "https://lh3.googleusercontent.com/d/16pukQmoilkjvP_JkGG69ge2LOCsnaJ_s",
+            "https://lh3.googleusercontent.com/d/1bnFbnXTqFKxl3aFUGNu0AXPz8WcLg425",
+            "https://lh3.googleusercontent.com/d/1_BxS7ktyHhCUF7lOOjmowcHvk62CMH0U",
+            "https://lh3.googleusercontent.com/d/1sCGQUx-QoeCkDEpR2WwZi_Cl__Pv-_Q4",
+            "https://lh3.googleusercontent.com/d/1HouApKiMaJ_E834HA7-LdhXZqfnhJ3QW",
+            "https://lh3.googleusercontent.com/d/16Ff2D_Q84rDvgoeA2ueNsW14powi0f_T",
+            "https://lh3.googleusercontent.com/d/1prq8H8Pav_O8Y5lF6cm_WwxxSz21D3FS",
+            "https://lh3.googleusercontent.com/d/1ZXb9cs5f215lC1aHLJLQBTzM331hE0aE",
+            "https://lh3.googleusercontent.com/d/1YOyiKMMOBl3MHqqoNEnCe2Egyp4Lw7iy",
+            "https://lh3.googleusercontent.com/d/1SpXAegjV1W3hmDLmY2hHD4Qi_xMcby_m",
+            "https://lh3.googleusercontent.com/d/1uxrJYPtZAI77q1KeNmmSoCRFZZP1RZOS",
+            "https://lh3.googleusercontent.com/d/135m3fYDBG66GxGpdVY71Av5ms7fD9zpO",
+            "https://lh3.googleusercontent.com/d/1eko1z3xJCQylq5hCH17UV7G6I50Qbmrn",
+            "https://lh3.googleusercontent.com/d/1LWBur7ACN51cf2mBO1Ouvc5X8Ak1pcCb",
+            "https://lh3.googleusercontent.com/d/1ATiPE8j-cUcbPCh-iRA1VIcL6BNVTx5W",
+            "https://lh3.googleusercontent.com/d/1yyyoRol3YkFDLIdTjGHxR73vYqAhJg98",
+            "https://lh3.googleusercontent.com/d/1mf4YM1NIvRn7RljxkcNygzib2Aw2RE-s",
+            "https://lh3.googleusercontent.com/d/1nSbMdvufEL2a4K4VzSeRkB9-VrjzvMbU",
+            "https://lh3.googleusercontent.com/d/1ygKbHgWc2BDhox1IwqLmYQ5lJ0JS9ox5",
+            "https://lh3.googleusercontent.com/d/1WkFJ3LelZuyaVlpPAF946kTbtqYpnktp",
+            "https://lh3.googleusercontent.com/d/1W5i_nGZfxHa5jgbBpgYE2220IiaggWV2"
           ]}
         />
 
