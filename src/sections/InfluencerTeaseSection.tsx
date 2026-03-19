@@ -1,5 +1,7 @@
 "use client";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { Play, Pause, Volume2, VolumeX, RotateCcw } from "lucide-react";
 
 const modelCapabilities = [
   "Face consistency model training", "Skin tone precision", "Fashion style bank",
@@ -17,10 +19,91 @@ const brandAdvantages = [
   "Different languages", "Different regions", "Same brand consistency",
 ];
 
+function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: string }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const togglePlay = () => {
+    const newState = !isPlaying;
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'command', func: newState ? 'playVideo' : 'pauseVideo' }),
+      '*'
+    );
+    setIsPlaying(newState);
+  };
+
+  const toggleMute = () => {
+    const newState = !isMuted;
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'command', func: newState ? 'mute' : 'unMute' }),
+      '*'
+    );
+    setIsMuted(newState);
+  };
+
+  const replayVideo = () => {
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'command', func: 'seekTo', args: [0, true] }),
+      '*'
+    );
+    if (!isPlaying) {
+      setIsPlaying(true);
+      iframeRef.current?.contentWindow?.postMessage(
+        JSON.stringify({ event: 'command', func: 'playVideo' }),
+        '*'
+      );
+    }
+  };
+
+  return (
+    <div className="relative aspect-[9/16] bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-all overflow-hidden group">
+      {videoId ? (
+        <>
+          <div className="absolute inset-0 w-full h-full pointer-events-none">
+            <iframe
+              ref={iframeRef}
+              className="w-full h-full"
+              src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1`}
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              title={`Video 9:16 ${index}`}
+            />
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+            <button
+              onClick={(e) => { e.stopPropagation(); replayVideo(); }}
+              className="p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto"
+            >
+              <RotateCcw size={14} />
+            </button>
+          </div>
+          <div className="absolute bottom-1 right-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <button
+              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+              className="p-1 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+            >
+              {isPlaying ? <Pause size={10} /> : <Play size={10} />}
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+              className="p-1 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+            >
+              {isMuted ? <VolumeX size={10} /> : <Volume2 size={10} />}
+            </button>
+          </div>
+        </>
+      ) : (
+        <span className="text-[8px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest group-hover:text-[#7a8c7f]/70 transition-colors">REEL</span>
+      )}
+    </div>
+  );
+}
+
 function ProfileCard({
-  name, dob, age, city, height, zodiac, side
+  name, dob, age, city, height, zodiac, side, videoIds = []
 }: {
-  name: string; dob: string; age: string; city: string; height: string; zodiac: string; side?: "left" | "right";
+  name: string; dob: string; age: string; city: string; height: string; zodiac: string; side?: "left" | "right"; videoIds?: string[];
 }) {
   return (
     <motion.div
@@ -58,13 +141,15 @@ function ProfileCard({
         <div className="flex flex-col gap-3">
           <span className="text-[10px] font-bold tracking-[0.3em] text-[#7a8c7f] uppercase">Content Grid</span>
           
-          {/* 4 Reels */}
-          <div className="grid grid-cols-4 gap-2">
-            {[0,1,2,3].map(i => (
-              <div key={i} className="aspect-[9/16] bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-colors group">
-                <span className="text-[8px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest group-hover:text-[#7a8c7f]/70 transition-colors">REEL</span>
-              </div>
-            ))}
+          {/* Reels Grid */}
+          <div className={`grid ${videoIds.length > 4 ? "grid-cols-4 sm:grid-cols-7" : "grid-cols-4"} gap-2`}>
+            {videoIds.length > 0 ? (
+              videoIds.map((id, i) => (
+                <VideoBlock9x16Compact key={i} index={i} videoId={id} />
+              ))
+            ) : (
+              [0,1,2,3].map(i => <VideoBlock9x16Compact key={i} index={i} />)
+            )}
           </div>
 
           {/* 8 Photos */}
@@ -113,8 +198,39 @@ export function InfluencerTeaseSection() {
         </motion.div>
 
         {/* Profile Cards */}
-        <ProfileCard name="AIRA" dob="January 01, 1998" age="26 yrs" city="Mumbai" height="5'8&quot;" zodiac="Capricorn" />
-        <ProfileCard name="DHAIRYA" dob="November 07, 1999" age="24 yrs" city="Delhi" height="6'0&quot;" zodiac="Scorpio" />
+        <ProfileCard 
+          name="AIRA" 
+          dob="January 01, 1998" 
+          age="26 yrs" 
+          city="Mumbai" 
+          height="5'8&quot;" 
+          zodiac="Capricorn" 
+          videoIds={[
+            "DdVYL-J7OMk",
+            "LYvR21TJ8s8",
+            "inp2v1UM7T4",
+            "SZSEHmd3tZU",
+            "H0R7KJeW5aU",
+            "PH4JRov_KZk",
+            "tvWCB82BKGk"
+          ]}
+        />
+        <ProfileCard 
+          name="DHAIRYA" 
+          dob="November 07, 1999" 
+          age="24 yrs" 
+          city="Delhi" 
+          height="6'0&quot;" 
+          zodiac="Scorpio" 
+          videoIds={[
+            "7gZJ2MXNcK4",
+            "eE5ekfo9o8c",
+            "Q497Y04of4k",
+            "RZUNg3ClvPc",
+            "to_ArTiVyx8",
+            "UoFRkvSYMb8"
+          ]}
+        />
 
         {/* Capabilities vs Advantages — side-by-side */}
         <motion.div
