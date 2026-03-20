@@ -757,7 +757,7 @@ export function ContentProductionSection() {
 
           {/* 16:9 Tags */}
           <div>
-            <SectionLabel label="Video [16:9]" />
+            <SectionLabel label="Video" />
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
               {video169Tags.map((t, i) => <TagCard key={i} label={t} />)}
             </div>
@@ -780,7 +780,7 @@ export function ContentProductionSection() {
 
           {/* 9:16 Tags + Carousel */}
           <div>
-            <SectionLabel label="Video [9:16]" />
+            <SectionLabel label="Video" />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
               {video916Tags.map((t, i) => <TagCard key={i} label={t} />)}
             </div>
@@ -805,7 +805,7 @@ export function ContentProductionSection() {
         <div className="mt-24 mb-24 flex flex-col gap-10">
           <SubSectionHeading text="UGC Style Videos" />
           <div>
-            <SectionLabel label="Video [9:16]" />
+            <SectionLabel label="Video" />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
               {ugcTags.map((t, i) => <TagCard key={i} label={t} />)}
             </div>

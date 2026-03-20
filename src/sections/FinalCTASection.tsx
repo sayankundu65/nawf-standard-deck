@@ -52,7 +52,7 @@ export function FinalCTASection() {
           <div className="h-px w-10 bg-current" />
           <span>The Overlap</span>
           <div className="h-px w-10 bg-current" />
-          <span>Ai and</span>
+          <span>Ai</span>
           <div className="h-px w-10 bg-current hidden md:block" />
           <span className="hidden md:block">2026</span>
         </motion.div>
