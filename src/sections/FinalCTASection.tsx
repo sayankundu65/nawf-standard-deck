@@ -35,9 +35,9 @@ export function FinalCTASection() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          <button className="mt-4 px-12 py-5 bg-[#c6ff2e] text-[#080f0c] font-heading font-black text-base md:text-lg tracking-widest uppercase rounded-full hover:bg-[#d4ff50] hover:scale-105 hover:shadow-[0_0_60px_rgba(198,255,46,0.4)] active:scale-95 transition-all duration-300">
-            Start Your Sandbox
-          </button>
+          <a href="https://wa.me/918287156273" target="_blank" rel="noopener noreferrer" className="inline-block mt-4 px-12 py-5 bg-[#c6ff2e] text-[#080f0c] font-heading font-black text-base md:text-lg tracking-widest uppercase rounded-full hover:bg-[#d4ff50] hover:scale-105 hover:shadow-[0_0_60px_rgba(198,255,46,0.4)] active:scale-95 transition-all duration-300">
+            Connect With Us
+          </a>
         </motion.div>
 
         {/* Footer line */}
@@ -48,13 +48,13 @@ export function FinalCTASection() {
           transition={{ delay: 0.6 }}
           className="flex items-center gap-8 mt-20 text-[#7a8c7f]/50 text-xs font-bold tracking-widest uppercase"
         >
-          <span>NAWF</span>
+          <span>Reality</span>
           <div className="h-px w-10 bg-current" />
-          <span>Content Production</span>
+          <span>The Overlap</span>
           <div className="h-px w-10 bg-current" />
-          <span>AI-First</span>
+          <span>Ai and</span>
           <div className="h-px w-10 bg-current hidden md:block" />
-          <span className="hidden md:block">© 2025</span>
+          <span className="hidden md:block">2026</span>
         </motion.div>
 
       </div>

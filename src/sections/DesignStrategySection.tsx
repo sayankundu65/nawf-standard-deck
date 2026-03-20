@@ -22,8 +22,8 @@ const designSections = [
       "https://lh3.googleusercontent.com/d/1iT8G5PBcAXVSgsbl_OqrZRD0vBoqVQi7",
       "https://lh3.googleusercontent.com/d/1G_MDO9ZgBTSvkjhhFFE7JWub_oJP3ejj",
       "https://lh3.googleusercontent.com/d/1NeUebPC0gbkIc91NLeUIhy-gZF44m5t1",
-      "https://lh3.googleusercontent.com/d/1U9J6K7DR_zuIA97DKflPqpa29Xc8Bbv7",
       "https://lh3.googleusercontent.com/d/1JkTPzNPA2Xs9Xy_dBqSfOojI41ZFuw6p",
+      "https://lh3.googleusercontent.com/d/1U9J6K7DR_zuIA97DKflPqpa29Xc8Bbv7",
       "https://lh3.googleusercontent.com/d/1ZeTEmikxnlt_iyUeHQxV5JPKh-r8R6Of"
     ],
   },
@@ -61,7 +61,9 @@ const designSections = [
     ],
     photoCount: 6,
     images: [
-      "https://lh3.googleusercontent.com/d/1i7UQqDVIUw1VScrUVuYNeSBjgp_TjiO2",
+      "https://lh3.googleusercontent.com/d/1t2dzkOYFCFJVWfJGhcyLPGbi_KPrcsMl",
+      "https://lh3.googleusercontent.com/d/1GkAIJeHQGxk8Hl4ftFvy1sIM9dTrc8az",
+      "https://lh3.googleusercontent.com/d/1yA4BiGaIrDGHCTB5iz_nWQss6B66DmUe",
       "https://lh3.googleusercontent.com/d/1O_BNW1vxheB0Dk91n9ovIcAWAvPf1I1T",
       "https://lh3.googleusercontent.com/d/1j80rdAqfrNF8jI1vdKRNJHwb7ggZjkVh",
       "https://lh3.googleusercontent.com/d/1wz70XvkcrWfgxYEsGcDM9BX-Fnhr4vAx",
@@ -77,10 +79,8 @@ const designSections = [
       "https://lh3.googleusercontent.com/d/12mvRnJhmk77OabhB2aggFvl8NXzKSfB1",
       "https://lh3.googleusercontent.com/d/1NrUi-E_b5-VT5qRvVA0xymp2HgWHKoFI",
       "https://lh3.googleusercontent.com/d/1PmCfdhdjQ9CRuBLwboXaVtIvA2FPgu_l",
-      "https://lh3.googleusercontent.com/d/1t2dzkOYFCFJVWfJGhcyLPGbi_KPrcsMl",
-      "https://lh3.googleusercontent.com/d/1GkAIJeHQGxk8Hl4ftFvy1sIM9dTrc8az",
-      "https://lh3.googleusercontent.com/d/1yA4BiGaIrDGHCTB5iz_nWQss6B66DmUe",
       "https://lh3.googleusercontent.com/d/1Db-cbd7Hp02xm6vdMmNy1Ri7K4RotmDz",
+      "https://lh3.googleusercontent.com/d/1i7UQqDVIUw1VScrUVuYNeSBjgp_TjiO2",
     ],
   },
 ];
