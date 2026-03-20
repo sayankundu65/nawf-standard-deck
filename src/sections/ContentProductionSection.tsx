@@ -1,48 +1,100 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback, useId } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Maximize2, X } from "lucide-react";
+import { claimUnmute, onUnmuteClaimed } from "../hooks/useVideoMuteSync";
+
+// ── Intersection Observer hook ────────────────────────────────────────────
+function useInView(threshold = 0.3) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return [ref, inView] as const;
+}
 
 // ── helpers ──────────────────────────────────────────────────────────
 function VideoBlock16x9({ index, videoId }: { index: number; videoId?: string }) {
+  const uid = useId(); // unique per instance across the whole page
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [containerRef, inView] = useInView(0.4);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
+  // Lazy-mount the iframe only once we've entered view
+  useEffect(() => {
+    if (inView && !isMounted) setIsMounted(true);
+  }, [inView, isMounted]);
+
+  const sendCmd = useCallback((func: string, args?: unknown[]) => {
+    const msg: Record<string, unknown> = { event: "command", func };
+    if (args) msg.args = args;
+    iframeRef.current?.contentWindow?.postMessage(JSON.stringify(msg), "*");
+  }, []);
+
+  // Play / pause based on viewport visibility
+  useEffect(() => {
+    if (!isMounted) return;
+    if (inView) {
+      sendCmd("playVideo");
+      setIsPlaying(true);
+    } else {
+      sendCmd("pauseVideo");
+      setIsPlaying(false);
+    }
+  }, [inView, isMounted, sendCmd]);
+
+  // Auto-mute when another video claims unmute
+  useEffect(() => {
+    return onUnmuteClaimed((owner) => {
+      if (owner !== uid && !isMuted) {
+        sendCmd("mute");
+        setIsMuted(true);
+      }
+    });
+  }, [uid, isMuted, sendCmd]);
+
   const togglePlay = () => {
-    const newState = !isPlaying;
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: newState ? 'playVideo' : 'pauseVideo' }),
-      '*'
-    );
-    setIsPlaying(newState);
+    const next = !isPlaying;
+    sendCmd(next ? "playVideo" : "pauseVideo");
+    setIsPlaying(next);
   };
 
   const toggleMute = () => {
-    const newState = !isMuted;
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: newState ? 'mute' : 'unMute' }),
-      '*'
-    );
-    setIsMuted(newState);
+    if (isMuted) {
+      // Currently muted → unmute
+      claimUnmute(uid); // notify all other videos to mute
+      sendCmd("unMute");
+      setIsMuted(false);
+    } else {
+      // Currently unmuted → mute
+      sendCmd("mute");
+      setIsMuted(true);
+    }
   };
 
   const replayVideo = () => {
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: 'seekTo', args: [0, true] }),
-      '*'
-    );
+    sendCmd("seekTo", [0, true]);
     if (!isPlaying) {
       setIsPlaying(true);
-      iframeRef.current?.contentWindow?.postMessage(
-        JSON.stringify({ event: 'command', func: 'playVideo' }),
-        '*'
-      );
+      sendCmd("playVideo");
     }
   };
 
   return (
     <motion.div
+      ref={containerRef}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -52,14 +104,17 @@ function VideoBlock16x9({ index, videoId }: { index: number; videoId?: string })
       {videoId ? (
         <>
           <div className="absolute inset-0 w-full h-full pointer-events-none">
-            <iframe
-              ref={iframeRef}
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1`}
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              title={`Video ${index}`}
-            />
+            {isMounted && (
+              <iframe
+                ref={iframeRef}
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1&vq=hd1080`}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                title={`Video ${index}`}
+                loading="lazy"
+              />
+            )}
           </div>
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
             <button
@@ -94,44 +149,73 @@ function VideoBlock16x9({ index, videoId }: { index: number; videoId?: string })
 }
 
 function VideoBlock9x16({ index, videoId }: { index: number; videoId?: string }) {
+  const uid = useId();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [containerRef, inView] = useInView(0.3);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
+  useEffect(() => {
+    if (inView && !isMounted) setIsMounted(true);
+  }, [inView, isMounted]);
+
+  const sendCmd = useCallback((func: string, args?: unknown[]) => {
+    const msg: Record<string, unknown> = { event: "command", func };
+    if (args) msg.args = args;
+    iframeRef.current?.contentWindow?.postMessage(JSON.stringify(msg), "*");
+  }, []);
+
+  // Play / pause based on viewport visibility
+  useEffect(() => {
+    if (!isMounted) return;
+    if (inView) {
+      sendCmd("playVideo");
+      setIsPlaying(true);
+    } else {
+      sendCmd("pauseVideo");
+      setIsPlaying(false);
+    }
+  }, [inView, isMounted, sendCmd]);
+
+  // Auto-mute when another video claims unmute
+  useEffect(() => {
+    return onUnmuteClaimed((owner) => {
+      if (owner !== uid && !isMuted) {
+        sendCmd("mute");
+        setIsMuted(true);
+      }
+    });
+  }, [uid, isMuted, sendCmd]);
+
   const togglePlay = () => {
-    const newState = !isPlaying;
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: newState ? 'playVideo' : 'pauseVideo' }),
-      '*'
-    );
-    setIsPlaying(newState);
+    const next = !isPlaying;
+    sendCmd(next ? "playVideo" : "pauseVideo");
+    setIsPlaying(next);
   };
 
   const toggleMute = () => {
-    const newState = !isMuted;
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: newState ? 'mute' : 'unMute' }),
-      '*'
-    );
-    setIsMuted(newState);
+    if (isMuted) {
+      claimUnmute(uid);
+      sendCmd("unMute");
+      setIsMuted(false);
+    } else {
+      sendCmd("mute");
+      setIsMuted(true);
+    }
   };
 
   const replayVideo = () => {
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: 'seekTo', args: [0, true] }),
-      '*'
-    );
+    sendCmd("seekTo", [0, true]);
     if (!isPlaying) {
       setIsPlaying(true);
-      iframeRef.current?.contentWindow?.postMessage(
-        JSON.stringify({ event: 'command', func: 'playVideo' }),
-        '*'
-      );
+      sendCmd("playVideo");
     }
   };
 
   return (
     <motion.div
+      ref={containerRef}
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
@@ -141,14 +225,17 @@ function VideoBlock9x16({ index, videoId }: { index: number; videoId?: string })
       {videoId ? (
         <>
           <div className="absolute inset-0 w-full h-full pointer-events-none">
-            <iframe
-              ref={iframeRef}
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1`}
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              title={`Video 9:16 ${index}`}
-            />
+            {isMounted && (
+              <iframe
+                ref={iframeRef}
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1&vq=hd1080`}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                title={`Video 9:16 ${index}`}
+                loading="lazy"
+              />
+            )}
           </div>
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
             <button
@@ -194,17 +281,29 @@ function PhotoBlock({ index, imageUrl }: { index: number; imageUrl?: string }) {
     >
       {imageUrl ? (
         <>
-          <img src={imageUrl} alt={`Photo ${index}`} className="w-full h-full object-cover rounded-2xl" />
+          <img
+            src={imageUrl}
+            alt={`Photo ${index}`}
+            className="w-full h-full object-cover rounded-2xl"
+            loading="lazy"
+            decoding="async"
+          />
           <button
             onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
             className="absolute top-2 right-2 p-2 rounded-full bg-[#080f0c]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
           >
             <Maximize2 size={16} />
           </button>
-          
+
           {isFull && (
             <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={() => setIsFull(false)}>
-              <img src={imageUrl} alt={`Photo ${index} Fullscreen`} className="max-w-full max-h-full object-contain rounded-lg" />
+              <img
+                src={imageUrl}
+                alt={`Photo ${index} Fullscreen`}
+                className="max-w-full max-h-full object-contain rounded-lg"
+                loading="lazy"
+                decoding="async"
+              />
               <button
                 onClick={(e) => { e.stopPropagation(); setIsFull(false); }}
                 className="absolute top-6 right-6 p-3 rounded-full bg-[#080f0c]/80 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
@@ -377,12 +476,12 @@ export function ContentProductionSection() {
 
   return (
     <section id="content-production" className="relative py-28 md:py-36 bg-[#080f0c] border-t border-white/5 overflow-hidden">
-      
+
       {/* Ambient */}
       <div className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full bg-[#c6ff2e]/3 blur-[150px] pointer-events-none" />
 
       <div className="max-w-[1300px] mx-auto px-6 md:px-12 lg:px-24">
-        
+
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -473,8 +572,7 @@ export function ContentProductionSection() {
           "-DavS3Ms2dw",
           "-xGG2N7mAAY",
           "rP7GWpduOxo",
-          "kRLN9N1xb8k",
-          "_qILgLGx3CM"
+          "kRLN9N1xb8k"
         ].map((id, i) => <VideoBlock9x16 key={i} index={i} videoId={id} />)}
       </HScrollCarousel>
 

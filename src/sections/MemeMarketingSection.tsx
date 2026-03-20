@@ -15,7 +15,7 @@ function PhotoBlock({ index, imageUrl }: { index: number; imageUrl?: string }) {
     >
       {imageUrl ? (
         <>
-          <img src={imageUrl} alt={`Meme ${index}`} className="w-full h-full object-cover rounded-2xl" />
+          <img src={imageUrl} alt={`Meme ${index}`} className="w-full h-full object-cover rounded-2xl" loading="lazy" decoding="async" />
           <button
             onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
             className="absolute top-2 right-2 p-2 rounded-full bg-[#080f0c]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
@@ -25,7 +25,7 @@ function PhotoBlock({ index, imageUrl }: { index: number; imageUrl?: string }) {
           
           {isFull && (
             <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={() => setIsFull(false)}>
-              <img src={imageUrl} alt={`Meme ${index} Fullscreen`} className="max-w-full max-h-full object-contain rounded-lg" />
+              <img src={imageUrl} alt={`Meme ${index} Fullscreen`} className="max-w-full max-h-full object-contain rounded-lg" loading="lazy" decoding="async" />
               <button
                 onClick={(e) => { e.stopPropagation(); setIsFull(false); }}
                 className="absolute top-6 right-6 p-3 rounded-full bg-[#080f0c]/80 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"

@@ -1,7 +1,27 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback, useId } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Maximize2, X } from "lucide-react";
+import { claimUnmute, onUnmuteClaimed } from "../hooks/useVideoMuteSync";
+
+// ── Intersection Observer hook ────────────────────────────────────────────
+function useInView(threshold = 0.3) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return [ref, inView] as const;
+}
 
 const modelCapabilities = [
   "Face consistency model training", "Skin tone precision", "Fashion style bank",
@@ -20,55 +40,89 @@ const brandAdvantages = [
 ];
 
 function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: string }) {
+  const uid = useId();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [containerRef, inView] = useInView(0.3);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
 
+  useEffect(() => {
+    if (inView && !isMounted) setIsMounted(true);
+  }, [inView, isMounted]);
+
+  const sendCmd = useCallback((func: string, args?: unknown[]) => {
+    const msg: Record<string, unknown> = { event: "command", func };
+    if (args) msg.args = args;
+    iframeRef.current?.contentWindow?.postMessage(JSON.stringify(msg), "*");
+  }, []);
+
+  // Play / pause based on viewport visibility
+  useEffect(() => {
+    if (!isMounted) return;
+    if (inView) {
+      sendCmd("playVideo");
+      setIsPlaying(true);
+    } else {
+      sendCmd("pauseVideo");
+      setIsPlaying(false);
+    }
+  }, [inView, isMounted, sendCmd]);
+
+  // Auto-mute when another video claims unmute
+  useEffect(() => {
+    return onUnmuteClaimed((owner) => {
+      if (owner !== uid && !isMuted) {
+        sendCmd("mute");
+        setIsMuted(true);
+      }
+    });
+  }, [uid, isMuted, sendCmd]);
+
   const togglePlay = () => {
-    const newState = !isPlaying;
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: newState ? 'playVideo' : 'pauseVideo' }),
-      '*'
-    );
-    setIsPlaying(newState);
+    const next = !isPlaying;
+    sendCmd(next ? "playVideo" : "pauseVideo");
+    setIsPlaying(next);
   };
 
   const toggleMute = () => {
-    const newState = !isMuted;
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: newState ? 'mute' : 'unMute' }),
-      '*'
-    );
-    setIsMuted(newState);
+    if (isMuted) {
+      claimUnmute(uid);
+      sendCmd("unMute");
+      setIsMuted(false);
+    } else {
+      sendCmd("mute");
+      setIsMuted(true);
+    }
   };
 
   const replayVideo = () => {
-    iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: 'seekTo', args: [0, true] }),
-      '*'
-    );
+    sendCmd("seekTo", [0, true]);
     if (!isPlaying) {
       setIsPlaying(true);
-      iframeRef.current?.contentWindow?.postMessage(
-        JSON.stringify({ event: 'command', func: 'playVideo' }),
-        '*'
-      );
+      sendCmd("playVideo");
     }
   };
 
   return (
-    <div className="relative aspect-[9/16] bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-all overflow-hidden group">
+    <div
+      ref={containerRef}
+      className="relative aspect-[9/16] bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-all overflow-hidden group"
+    >
       {videoId ? (
         <>
           <div className="absolute inset-0 w-full h-full pointer-events-none">
-            <iframe
-              ref={iframeRef}
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1`}
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              title={`Video 9:16 ${index}`}
-            />
+            {isMounted && (
+              <iframe
+                ref={iframeRef}
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1&vq=hd1080`}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                title={`Video 9:16 ${index}`}
+                loading="lazy"
+              />
+            )}
           </div>
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
             <button
@@ -104,7 +158,13 @@ function ProfilePhotoItem({ imageUrl, index }: { imageUrl: string, index: number
   const [isFull, setIsFull] = useState(false);
   return (
     <div className="relative aspect-square bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center overflow-hidden group">
-      <img src={imageUrl} alt={`Photo ${index}`} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+      <img
+        src={imageUrl}
+        alt={`Photo ${index}`}
+        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+        loading="lazy"
+        decoding="async"
+      />
       <button
         onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
         className="absolute top-2 right-2 p-1.5 rounded-full bg-[#080f0c]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
@@ -114,7 +174,13 @@ function ProfilePhotoItem({ imageUrl, index }: { imageUrl: string, index: number
 
       {isFull && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-4" onClick={() => setIsFull(false)}>
-          <img src={imageUrl} alt={`Photo ${index} Fullscreen`} className="max-w-full max-h-full object-contain rounded-lg" />
+          <img
+            src={imageUrl}
+            alt={`Photo ${index} Fullscreen`}
+            className="max-w-full max-h-full object-contain rounded-lg"
+            loading="lazy"
+            decoding="async"
+          />
           <button
             onClick={(e) => { e.stopPropagation(); setIsFull(false); }}
             className="absolute top-6 right-6 p-3 rounded-full bg-[#080f0c]/80 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
@@ -128,7 +194,7 @@ function ProfilePhotoItem({ imageUrl, index }: { imageUrl: string, index: number
 }
 
 function ProfileCard({
-  name, dob, age, city, height, zodiac, side, videoIds = [], photoUrls = []
+  name, dob, age, city, height, zodiac, videoIds = [], photoUrls = []
 }: {
   name: string; dob: string; age: string; city: string; height: string; zodiac: string; side?: "left" | "right"; videoIds?: string[]; photoUrls?: string[];
 }) {
@@ -145,10 +211,16 @@ function ProfileCard({
         <div className="absolute top-0 right-0 w-full h-full border-t-2 border-r-2 border-[#c6ff2e] rounded-tr-3xl" />
       </div>
 
-      {/* Avatar placeholder */}
+      {/* Avatar */}
       <div className="flex-shrink-0 w-full lg:w-52 aspect-[3/4] lg:aspect-auto lg:h-64 bg-[#111c16] border border-white/8 rounded-2xl flex items-center justify-center overflow-hidden">
         {photoUrls.length > 0 ? (
-          <img src={photoUrls[0]} alt={`${name} avatar`} className="w-full h-full object-cover" />
+          <img
+            src={photoUrls[0]}
+            alt={`${name} avatar`}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
         ) : (
           <span className="font-heading font-black text-[#7a8c7f]/30 text-lg uppercase">{name}</span>
         )}
@@ -365,7 +437,6 @@ export function InfluencerTeaseSection() {
               100+ Real Creators<br />With an Overlap Mindset
             </h3>
           </div>
-
         </motion.div>
 
         {/* Custom Brand AI Creators */}

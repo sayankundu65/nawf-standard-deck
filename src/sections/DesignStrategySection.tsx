@@ -66,7 +66,7 @@ function DesignPhotoBlock({ index, imageUrl }: { index: number; imageUrl?: strin
     <div className="relative aspect-[4/3] rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all flex-shrink-0 w-[260px] md:w-[380px] overflow-hidden">
       {imageUrl ? (
         <>
-          <img src={imageUrl} alt={`Design ${index + 1}`} className="w-full h-full object-cover" />
+          <img src={imageUrl} alt={`Design ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
           <button
             onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
             className="absolute top-2 right-2 p-2 rounded-full bg-[#080f0c]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
@@ -75,7 +75,7 @@ function DesignPhotoBlock({ index, imageUrl }: { index: number; imageUrl?: strin
           </button>
           {isFull && (
             <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] p-4" onClick={() => setIsFull(false)}>
-              <img src={imageUrl} alt={`Design ${index + 1} Fullscreen`} className="max-w-full max-h-full object-contain rounded-lg" />
+              <img src={imageUrl} alt={`Design ${index + 1} Fullscreen`} className="max-w-full max-h-full object-contain rounded-lg" loading="lazy" decoding="async" />
               <button
                 onClick={(e) => { e.stopPropagation(); setIsFull(false); }}
                 className="absolute top-6 right-6 p-3 rounded-full bg-[#080f0c]/80 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
