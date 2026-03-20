@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, Children } from "react";
 import { motion } from "framer-motion";
 import { Maximize2, X } from "lucide-react";
 
@@ -69,7 +69,7 @@ function DesignPhotoBlock({ index, imageUrl }: { index: number; imageUrl?: strin
           <img src={imageUrl} alt={`Design ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
           <button
             onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
-            className="absolute top-2 right-2 p-2 rounded-full bg-[#080f0c]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+            className="absolute top-2 right-2 p-2 rounded-full bg-[#080f0c]/60 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
           >
             <Maximize2 size={16} />
           </button>
@@ -89,6 +89,76 @@ function DesignPhotoBlock({ index, imageUrl }: { index: number; imageUrl?: strin
         <span className="text-[#7a8c7f]/30 font-heading text-xs uppercase tracking-widest group-hover:text-[#7a8c7f]/60 transition-colors">
           DESIGN {String(index + 1).padStart(2, "0")}
         </span>
+      )}
+    </div>
+  );
+}
+
+function HScrollCarousel({ children }: { children: React.ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const childCount = Children.count(children);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll <= 0) { setActiveIndex(0); return; }
+      const progress = scrollLeft / maxScroll;
+      const idx = Math.round(progress * (childCount - 1));
+      setActiveIndex(Math.min(idx, childCount - 1));
+    };
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [childCount]);
+
+  const scrollToIndex = (idx: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollWidth, clientWidth } = el;
+    const maxScroll = scrollWidth - clientWidth;
+    const target = (idx / (childCount - 1)) * maxScroll;
+    el.scrollTo({ left: target, behavior: "smooth" });
+  };
+
+  const maxDots = Math.min(childCount, 7);
+  const dotIndices: number[] = [];
+  if (childCount <= 7) {
+    for (let i = 0; i < childCount; i++) dotIndices.push(i);
+  } else {
+    const step = (childCount - 1) / (maxDots - 1);
+    for (let i = 0; i < maxDots; i++) dotIndices.push(Math.round(i * step));
+  }
+
+  return (
+    <div className="mt-16 w-screen relative left-1/2 right-1/2 -mx-[50vw]">
+      <div
+        ref={scrollRef}
+        className="flex gap-5 overflow-x-auto px-6 md:px-24 pb-6 snap-x snap-mandatory"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {children}
+      </div>
+      {childCount > 1 && (
+        <div className="flex justify-center gap-2 pt-4 pb-2">
+          {dotIndices.map((dotIdx, i) => {
+            const closest = dotIndices.reduce((prev, curr) =>
+              Math.abs(curr - activeIndex) < Math.abs(prev - activeIndex) ? curr : prev
+            );
+            const isActive = dotIdx === closest && i === dotIndices.indexOf(closest);
+            return (
+              <button
+                key={i}
+                onClick={() => scrollToIndex(dotIdx)}
+                className={`rounded-full transition-all duration-300 ${
+                  isActive ? "w-6 h-2 bg-[#c6ff2e]" : "w-2 h-2 bg-white/20 hover:bg-white/40"
+                }`}
+              />
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -179,16 +249,11 @@ export function DesignStrategySection() {
       </div>
 
       {/* Combined Full-bleed photo carousel */}
-      <div className="mt-16 w-screen relative left-1/2 right-1/2 -mx-[50vw]">
-        <div
-          className="flex gap-5 overflow-x-auto px-6 md:px-24 pb-6"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {designPhotoUrls.map((url, i) => (
-            <DesignPhotoBlock key={i} index={i} imageUrl={url} />
-          ))}
-        </div>
-      </div>
+      <HScrollCarousel>
+        {designPhotoUrls.map((url, i) => (
+          <DesignPhotoBlock key={i} index={i} imageUrl={url} />
+        ))}
+      </HScrollCarousel>
     </section>
   );
 }

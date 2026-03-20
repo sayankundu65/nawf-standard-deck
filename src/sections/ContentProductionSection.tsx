@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect, useCallback, useId } from "react";
+import React, { useState, useRef, useEffect, useCallback, useId, Children } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Maximize2, X } from "lucide-react";
 import { claimUnmute, onUnmuteClaimed } from "../hooks/useVideoMuteSync";
@@ -23,138 +23,38 @@ function useInView(threshold = 0.3) {
   return [ref, inView] as const;
 }
 
+// ── Fullscreen Video Modal ──────────────────────────────────────────────
+function FullscreenVideoModal({ videoId, onClose }: { videoId: string; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="relative w-full max-w-5xl aspect-video" onClick={(e) => e.stopPropagation()}>
+        <iframe
+          className="w-full h-full rounded-xl"
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&vq=hd1080`}
+          allow="autoplay; encrypted-media; fullscreen"
+          allowFullScreen
+          title="Fullscreen Video"
+        />
+      </div>
+      <button
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        className="absolute top-6 right-6 p-3 rounded-full bg-white/10 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+      >
+        <X size={24} />
+      </button>
+    </div>
+  );
+}
+
 // ── helpers ──────────────────────────────────────────────────────────
 function VideoBlock16x9({ index, videoId }: { index: number; videoId?: string }) {
-  const uid = useId(); // unique per instance across the whole page
+  const uid = useId();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [containerRef, inView] = useInView(0.4);
   const [isMounted, setIsMounted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-
-  // Lazy-mount the iframe only once we've entered view
-  useEffect(() => {
-    if (inView && !isMounted) setIsMounted(true);
-  }, [inView, isMounted]);
-
-  const sendCmd = useCallback((func: string, args?: unknown[]) => {
-    const msg: Record<string, unknown> = { event: "command", func };
-    if (args) msg.args = args;
-    iframeRef.current?.contentWindow?.postMessage(JSON.stringify(msg), "*");
-  }, []);
-
-  // Play / pause based on viewport visibility
-  useEffect(() => {
-    if (!isMounted) return;
-    if (inView) {
-      sendCmd("playVideo");
-      setIsPlaying(true);
-    } else {
-      sendCmd("pauseVideo");
-      setIsPlaying(false);
-    }
-  }, [inView, isMounted, sendCmd]);
-
-  // Auto-mute when another video claims unmute
-  useEffect(() => {
-    return onUnmuteClaimed((owner) => {
-      if (owner !== uid && !isMuted) {
-        sendCmd("mute");
-        setIsMuted(true);
-      }
-    });
-  }, [uid, isMuted, sendCmd]);
-
-  const togglePlay = () => {
-    const next = !isPlaying;
-    sendCmd(next ? "playVideo" : "pauseVideo");
-    setIsPlaying(next);
-  };
-
-  const toggleMute = () => {
-    if (isMuted) {
-      // Currently muted → unmute
-      claimUnmute(uid); // notify all other videos to mute
-      sendCmd("unMute");
-      setIsMuted(false);
-    } else {
-      // Currently unmuted → mute
-      sendCmd("mute");
-      setIsMuted(true);
-    }
-  };
-
-  const replayVideo = () => {
-    sendCmd("seekTo", [0, true]);
-    if (!isPlaying) {
-      setIsPlaying(true);
-      sendCmd("playVideo");
-    }
-  };
-
-  return (
-    <motion.div
-      ref={containerRef}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.06, duration: 0.6 }}
-      className="relative aspect-video rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all overflow-hidden"
-    >
-      {videoId ? (
-        <>
-          <div className="absolute inset-0 w-full h-full pointer-events-none">
-            {isMounted && (
-              <iframe
-                ref={iframeRef}
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1&vq=hd1080`}
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                title={`Video ${index}`}
-                loading="lazy"
-              />
-            )}
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-            <button
-              onClick={(e) => { e.stopPropagation(); replayVideo(); }}
-              className="p-4 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto shadow-xl"
-            >
-              <RotateCcw size={28} />
-            </button>
-          </div>
-          <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <button
-              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-              className="p-2 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
-            >
-              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); toggleMute(); }}
-              className="p-2 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
-            >
-              {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            </button>
-          </div>
-        </>
-      ) : (
-        <span className="text-[#7a8c7f]/40 font-heading font-bold text-sm uppercase tracking-widest group-hover:text-[#7a8c7f]/70 transition-colors">
-          16:9 — {String(index + 1).padStart(2, "0")}
-        </span>
-      )}
-    </motion.div>
-  );
-}
-
-function VideoBlock9x16({ index, videoId }: { index: number; videoId?: string }) {
-  const uid = useId();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [containerRef, inView] = useInView(0.3);
-  const [isMounted, setIsMounted] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isFull, setIsFull] = useState(false);
 
   useEffect(() => {
     if (inView && !isMounted) setIsMounted(true);
@@ -166,7 +66,6 @@ function VideoBlock9x16({ index, videoId }: { index: number; videoId?: string })
     iframeRef.current?.contentWindow?.postMessage(JSON.stringify(msg), "*");
   }, []);
 
-  // Play / pause based on viewport visibility
   useEffect(() => {
     if (!isMounted) return;
     if (inView) {
@@ -178,7 +77,6 @@ function VideoBlock9x16({ index, videoId }: { index: number; videoId?: string })
     }
   }, [inView, isMounted, sendCmd]);
 
-  // Auto-mute when another video claims unmute
   useEffect(() => {
     return onUnmuteClaimed((owner) => {
       if (owner !== uid && !isMuted) {
@@ -214,58 +112,200 @@ function VideoBlock9x16({ index, videoId }: { index: number; videoId?: string })
   };
 
   return (
-    <motion.div
-      ref={containerRef}
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.06, duration: 0.6 }}
-      className="relative aspect-[9/16] rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all flex-shrink-0 w-[180px] md:w-[220px] h-auto overflow-hidden"
-    >
-      {videoId ? (
-        <>
-          <div className="absolute inset-0 w-full h-full pointer-events-none">
-            {isMounted && (
-              <iframe
-                ref={iframeRef}
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1&vq=hd1080`}
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                title={`Video 9:16 ${index}`}
-                loading="lazy"
-              />
-            )}
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-            <button
-              onClick={(e) => { e.stopPropagation(); replayVideo(); }}
-              className="p-3 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto shadow-xl"
-            >
-              <RotateCcw size={20} />
-            </button>
-          </div>
-          <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <button
-              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-              className="p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
-            >
-              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); toggleMute(); }}
-              className="p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
-            >
-              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-            </button>
-          </div>
-        </>
-      ) : (
-        <span className="text-[#7a8c7f]/40 font-heading font-bold text-xs uppercase tracking-widest writing-mode-vertical group-hover:text-[#7a8c7f]/70 transition-colors">
-          9:16 — {String(index + 1).padStart(2, "0")}
-        </span>
-      )}
-    </motion.div>
+    <>
+      <motion.div
+        ref={containerRef}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: index * 0.06, duration: 0.6 }}
+        className="relative aspect-video rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all overflow-hidden"
+      >
+        {videoId ? (
+          <>
+            <div className="absolute inset-0 w-full h-full pointer-events-none">
+              {isMounted && (
+                <iframe
+                  ref={iframeRef}
+                  className="w-full h-full"
+                  src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1&vq=hd1080`}
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  title={`Video ${index}`}
+                  loading="lazy"
+                />
+              )}
+            </div>
+            {/* Center replay – visible on hover (desktop) and always on mobile */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+              <button
+                onClick={(e) => { e.stopPropagation(); replayVideo(); }}
+                className="p-4 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto shadow-xl"
+              >
+                <RotateCcw size={28} />
+              </button>
+            </div>
+            {/* Bottom controls – always visible on mobile, hover on desktop */}
+            <div className="absolute bottom-3 right-3 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
+              <button
+                onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                className="p-2 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+              >
+                {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+                className="p-2 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+              >
+                {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
+                className="p-2 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+              >
+                <Maximize2 size={16} />
+              </button>
+            </div>
+          </>
+        ) : (
+          <span className="text-[#7a8c7f]/40 font-heading font-bold text-sm uppercase tracking-widest group-hover:text-[#7a8c7f]/70 transition-colors">
+            16:9 — {String(index + 1).padStart(2, "0")}
+          </span>
+        )}
+      </motion.div>
+      {isFull && videoId && <FullscreenVideoModal videoId={videoId} onClose={() => setIsFull(false)} />}
+    </>
+  );
+}
+
+function VideoBlock9x16({ index, videoId }: { index: number; videoId?: string }) {
+  const uid = useId();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [containerRef, inView] = useInView(0.3);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isFull, setIsFull] = useState(false);
+
+  useEffect(() => {
+    if (inView && !isMounted) setIsMounted(true);
+  }, [inView, isMounted]);
+
+  const sendCmd = useCallback((func: string, args?: unknown[]) => {
+    const msg: Record<string, unknown> = { event: "command", func };
+    if (args) msg.args = args;
+    iframeRef.current?.contentWindow?.postMessage(JSON.stringify(msg), "*");
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    if (inView) {
+      sendCmd("playVideo");
+      setIsPlaying(true);
+    } else {
+      sendCmd("pauseVideo");
+      setIsPlaying(false);
+    }
+  }, [inView, isMounted, sendCmd]);
+
+  useEffect(() => {
+    return onUnmuteClaimed((owner) => {
+      if (owner !== uid && !isMuted) {
+        sendCmd("mute");
+        setIsMuted(true);
+      }
+    });
+  }, [uid, isMuted, sendCmd]);
+
+  const togglePlay = () => {
+    const next = !isPlaying;
+    sendCmd(next ? "playVideo" : "pauseVideo");
+    setIsPlaying(next);
+  };
+
+  const toggleMute = () => {
+    if (isMuted) {
+      claimUnmute(uid);
+      sendCmd("unMute");
+      setIsMuted(false);
+    } else {
+      sendCmd("mute");
+      setIsMuted(true);
+    }
+  };
+
+  const replayVideo = () => {
+    sendCmd("seekTo", [0, true]);
+    if (!isPlaying) {
+      setIsPlaying(true);
+      sendCmd("playVideo");
+    }
+  };
+
+  return (
+    <>
+      <motion.div
+        ref={containerRef}
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: index * 0.06, duration: 0.6 }}
+        className="relative aspect-[9/16] rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all flex-shrink-0 w-[180px] md:w-[220px] h-auto overflow-hidden"
+      >
+        {videoId ? (
+          <>
+            <div className="absolute inset-0 w-full h-full pointer-events-none">
+              {isMounted && (
+                <iframe
+                  ref={iframeRef}
+                  className="w-full h-full"
+                  src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1&vq=hd1080`}
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  title={`Video 9:16 ${index}`}
+                  loading="lazy"
+                />
+              )}
+            </div>
+            {/* Center replay */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+              <button
+                onClick={(e) => { e.stopPropagation(); replayVideo(); }}
+                className="p-2.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto shadow-xl"
+              >
+                <RotateCcw size={16} />
+              </button>
+            </div>
+            {/* Bottom controls */}
+            <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
+              <button
+                onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                className="p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+              >
+                {isPlaying ? <Pause size={12} /> : <Play size={12} />}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+                className="p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+              >
+                {isMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
+                className="p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+              >
+                <Maximize2 size={12} />
+              </button>
+            </div>
+          </>
+        ) : (
+          <span className="text-[#7a8c7f]/40 font-heading font-bold text-xs uppercase tracking-widest writing-mode-vertical group-hover:text-[#7a8c7f]/70 transition-colors">
+            9:16 — {String(index + 1).padStart(2, "0")}
+          </span>
+        )}
+      </motion.div>
+      {isFull && videoId && <FullscreenVideoModal videoId={videoId} onClose={() => setIsFull(false)} />}
+    </>
   );
 }
 
@@ -290,7 +330,7 @@ function PhotoBlock({ index, imageUrl }: { index: number; imageUrl?: string }) {
           />
           <button
             onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
-            className="absolute top-2 right-2 p-2 rounded-full bg-[#080f0c]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+            className="absolute top-2 right-2 p-2 rounded-full bg-[#080f0c]/60 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
           >
             <Maximize2 size={16} />
           </button>
@@ -367,15 +407,81 @@ function SubSectionHeading({ text }: { text: string }) {
   );
 }
 
+// ── HScrollCarousel with dot indicators ───────────────────────────────
 function HScrollCarousel({ children }: { children: React.ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const childCount = Children.count(children);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll <= 0) { setActiveIndex(0); return; }
+      const progress = scrollLeft / maxScroll;
+      const idx = Math.round(progress * (childCount - 1));
+      setActiveIndex(Math.min(idx, childCount - 1));
+    };
+
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [childCount]);
+
+  const scrollToIndex = (idx: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollWidth, clientWidth } = el;
+    const maxScroll = scrollWidth - clientWidth;
+    const target = (idx / (childCount - 1)) * maxScroll;
+    el.scrollTo({ left: target, behavior: "smooth" });
+  };
+
+  // Show a max of 7 dots; collapse middle ones if many items
+  const maxDots = Math.min(childCount, 7);
+  const dotIndices: number[] = [];
+  if (childCount <= 7) {
+    for (let i = 0; i < childCount; i++) dotIndices.push(i);
+  } else {
+    const step = (childCount - 1) / (maxDots - 1);
+    for (let i = 0; i < maxDots; i++) dotIndices.push(Math.round(i * step));
+  }
+
   return (
     <div className="w-screen relative left-1/2 right-1/2 -mx-[50vw]">
       <div
-        className="flex gap-5 overflow-x-auto px-6 md:px-12 lg:px-24 pb-6"
+        ref={scrollRef}
+        className="flex gap-5 overflow-x-auto px-6 md:px-12 lg:px-24 pb-6 snap-x snap-mandatory"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
       </div>
+      {/* Dot indicators */}
+      {childCount > 1 && (
+        <div className="flex justify-center gap-2 pt-4 pb-2">
+          {dotIndices.map((dotIdx, i) => {
+            // Find closest actual index
+            const isActive = dotIdx === dotIndices.reduce((prev, curr) =>
+              Math.abs(curr - activeIndex) < Math.abs(prev - activeIndex) ? curr : prev
+            ) && i === dotIndices.indexOf(dotIndices.reduce((prev, curr) =>
+              Math.abs(curr - activeIndex) < Math.abs(prev - activeIndex) ? curr : prev
+            ));
+            return (
+              <button
+                key={i}
+                onClick={() => scrollToIndex(dotIdx)}
+                className={`rounded-full transition-all duration-300 ${
+                  isActive
+                    ? "w-6 h-2 bg-[#c6ff2e]"
+                    : "w-2 h-2 bg-white/20 hover:bg-white/40"
+                }`}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -476,12 +582,12 @@ export function ContentProductionSection() {
 
   return (
     <section id="content-production" className="relative py-28 md:py-36 bg-[#080f0c] border-t border-white/5 overflow-hidden">
-
+      
       {/* Ambient */}
       <div className="absolute top-1/4 right-0 w-[600px] h-[600px] rounded-full bg-[#c6ff2e]/3 blur-[150px] pointer-events-none" />
 
       <div className="max-w-[1300px] mx-auto px-6 md:px-12 lg:px-24">
-
+        
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -572,7 +678,8 @@ export function ContentProductionSection() {
           "-DavS3Ms2dw",
           "-xGG2N7mAAY",
           "rP7GWpduOxo",
-          "kRLN9N1xb8k"
+          "kRLN9N1xb8k",
+          "_qILgLGx3CM"
         ].map((id, i) => <VideoBlock9x16 key={i} index={i} videoId={id} />)}
       </HScrollCarousel>
 

@@ -4,6 +4,29 @@ import { motion } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX, RotateCcw, Maximize2, X } from "lucide-react";
 import { claimUnmute, onUnmuteClaimed } from "../hooks/useVideoMuteSync";
 
+// ── Fullscreen Video Modal ──────────────────────────────────────────────
+function FullscreenVideoModal({ videoId, onClose }: { videoId: string; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="relative w-full max-w-5xl aspect-video" onClick={(e) => e.stopPropagation()}>
+        <iframe
+          className="w-full h-full rounded-xl"
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0&modestbranding=1&playsinline=1&vq=hd1080`}
+          allow="autoplay; encrypted-media; fullscreen"
+          allowFullScreen
+          title="Fullscreen Video"
+        />
+      </div>
+      <button
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        className="absolute top-6 right-6 p-3 rounded-full bg-white/10 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+      >
+        <X size={24} />
+      </button>
+    </div>
+  );
+}
+
 // ── Intersection Observer hook ────────────────────────────────────────────
 function useInView(threshold = 0.3) {
   const ref = useRef<HTMLDivElement>(null);
@@ -46,6 +69,7 @@ function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: st
   const [isMounted, setIsMounted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [isFull, setIsFull] = useState(false);
 
   useEffect(() => {
     if (inView && !isMounted) setIsMounted(true);
@@ -57,7 +81,6 @@ function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: st
     iframeRef.current?.contentWindow?.postMessage(JSON.stringify(msg), "*");
   }, []);
 
-  // Play / pause based on viewport visibility
   useEffect(() => {
     if (!isMounted) return;
     if (inView) {
@@ -69,7 +92,6 @@ function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: st
     }
   }, [inView, isMounted, sendCmd]);
 
-  // Auto-mute when another video claims unmute
   useEffect(() => {
     return onUnmuteClaimed((owner) => {
       if (owner !== uid && !isMuted) {
@@ -105,52 +127,63 @@ function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: st
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="relative aspect-[9/16] bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-all overflow-hidden group"
-    >
-      {videoId ? (
-        <>
-          <div className="absolute inset-0 w-full h-full pointer-events-none">
-            {isMounted && (
-              <iframe
-                ref={iframeRef}
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1&vq=hd1080`}
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                title={`Video 9:16 ${index}`}
-                loading="lazy"
-              />
-            )}
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-            <button
-              onClick={(e) => { e.stopPropagation(); replayVideo(); }}
-              className="p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto"
-            >
-              <RotateCcw size={14} />
-            </button>
-          </div>
-          <div className="absolute bottom-1 right-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <button
-              onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-              className="p-1 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
-            >
-              {isPlaying ? <Pause size={10} /> : <Play size={10} />}
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); toggleMute(); }}
-              className="p-1 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
-            >
-              {isMuted ? <VolumeX size={10} /> : <Volume2 size={10} />}
-            </button>
-          </div>
-        </>
-      ) : (
-        <span className="text-[8px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest group-hover:text-[#7a8c7f]/70 transition-colors">REEL</span>
-      )}
-    </div>
+    <>
+      <div
+        ref={containerRef}
+        className="relative aspect-[9/16] bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-all overflow-hidden group"
+      >
+        {videoId ? (
+          <>
+            <div className="absolute inset-0 w-full h-full pointer-events-none">
+              {isMounted && (
+                <iframe
+                  ref={iframeRef}
+                  className="w-full h-full"
+                  src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&modestbranding=1&mute=1&playsinline=1&fs=0&disablekb=1&vq=hd1080`}
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  title={`Video 9:16 ${index}`}
+                  loading="lazy"
+                />
+              )}
+            </div>
+            {/* Center replay – always visible on mobile */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+              <button
+                onClick={(e) => { e.stopPropagation(); replayVideo(); }}
+                className="p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto"
+              >
+                <RotateCcw size={14} />
+              </button>
+            </div>
+            {/* Bottom controls – always visible on mobile */}
+            <div className="absolute bottom-1 right-1 flex flex-col gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
+              <button
+                onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                className="p-1 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+              >
+                {isPlaying ? <Pause size={10} /> : <Play size={10} />}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+                className="p-1 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+              >
+                {isMuted ? <VolumeX size={10} /> : <Volume2 size={10} />}
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
+                className="p-1 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+              >
+                <Maximize2 size={10} />
+              </button>
+            </div>
+          </>
+        ) : (
+          <span className="text-[8px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest group-hover:text-[#7a8c7f]/70 transition-colors">REEL</span>
+        )}
+      </div>
+      {isFull && videoId && <FullscreenVideoModal videoId={videoId} onClose={() => setIsFull(false)} />}
+    </>
   );
 }
 
@@ -167,7 +200,7 @@ function ProfilePhotoItem({ imageUrl, index }: { imageUrl: string, index: number
       />
       <button
         onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
-        className="absolute top-2 right-2 p-1.5 rounded-full bg-[#080f0c]/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+        className="absolute top-2 right-2 p-1.5 rounded-full bg-[#080f0c]/60 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
       >
         <Maximize2 size={14} />
       </button>
@@ -417,9 +450,9 @@ export function InfluencerTeaseSection() {
             </div>
           </div>
           <div>
-            <h4 className="text-xs font-bold tracking-[0.3em] uppercase text-[#7a8c7f] mb-6">Brand Advantages — No Drama / Cost Efficiency</h4>
+            <h4 className="text-xs font-bold tracking-[0.3em] uppercase text-[#c6ff2e] mb-6">Brand Advantages — No Drama / Cost Efficiency</h4>
             <div className="flex flex-col gap-2">
-              {brandAdvantages.map((adv, i) => <ListCard key={i} label={adv} variant="dim" />)}
+              {brandAdvantages.map((adv, i) => <ListCard key={i} label={adv} variant="accent" />)}
             </div>
           </div>
         </motion.div>
