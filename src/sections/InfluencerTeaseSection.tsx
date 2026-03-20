@@ -147,13 +147,13 @@ function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: st
                 />
               )}
             </div>
-            {/* Center replay – always visible on mobile */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+            {/* Replay – bottom-left on mobile, center on desktop */}
+            <div className="absolute bottom-1.5 left-1.5 md:inset-0 md:bottom-auto md:left-auto md:flex md:items-center md:justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none md:w-full md:h-full">
               <button
                 onClick={(e) => { e.stopPropagation(); replayVideo(); }}
-                className="p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto"
+                className="p-1 md:p-1.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto flex items-center justify-center"
               >
-                <RotateCcw size={14} />
+                <RotateCcw className="w-2.5 h-2.5 md:w-3.5 md:h-3.5" />
               </button>
             </div>
             {/* Bottom controls – always visible on mobile */}
@@ -278,7 +278,7 @@ function ProfileCard({
           <span className="text-[10px] font-bold tracking-[0.3em] text-[#7a8c7f] uppercase">Content Grid</span>
           
           {/* Reels Grid */}
-          <div className={`grid ${videoIds.length > 4 ? "grid-cols-4 sm:grid-cols-7" : "grid-cols-4"} gap-2`}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
             {videoIds.length > 0 ? (
               videoIds.map((id, i) => (
                 <VideoBlock9x16Compact key={i} index={i} videoId={id} />

@@ -136,13 +136,13 @@ function VideoBlock16x9({ index, videoId }: { index: number; videoId?: string })
                 />
               )}
             </div>
-            {/* Center replay – visible on hover (desktop) and always on mobile */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+            {/* Replay – bottom-left on mobile, center on desktop */}
+            <div className="absolute bottom-3 left-3 md:inset-0 md:bottom-auto md:left-auto md:flex md:items-center md:justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none md:w-full md:h-full">
               <button
                 onClick={(e) => { e.stopPropagation(); replayVideo(); }}
-                className="p-4 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto shadow-xl"
+                className="p-1.5 md:p-4 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto shadow-xl flex items-center justify-center"
               >
-                <RotateCcw size={28} />
+                <RotateCcw className="w-4 h-4 md:w-7 md:h-7" />
               </button>
             </div>
             {/* Bottom controls – always visible on mobile, hover on desktop */}
@@ -267,13 +267,13 @@ function VideoBlock9x16({ index, videoId }: { index: number; videoId?: string })
                 />
               )}
             </div>
-            {/* Center replay */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+            {/* Replay – bottom-left on mobile, center on desktop */}
+            <div className="absolute bottom-2 left-2 md:inset-0 md:bottom-auto md:left-auto md:flex md:items-center md:justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10 pointer-events-none md:w-full md:h-full">
               <button
                 onClick={(e) => { e.stopPropagation(); replayVideo(); }}
-                className="p-2.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto shadow-xl"
+                className="p-1 md:p-2.5 rounded-full bg-[#080f0c]/60 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors pointer-events-auto shadow-xl flex items-center justify-center"
               >
-                <RotateCcw size={16} />
+                <RotateCcw className="w-3 h-3 md:w-4 md:h-4" />
               </button>
             </div>
             {/* Bottom controls */}
