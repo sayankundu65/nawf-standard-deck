@@ -27,16 +27,7 @@ export function HeroSection() {
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center text-center px-6 md:px-12 max-w-6xl mx-auto">
         
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8"
-        >
-          <span className="text-xs font-bold tracking-[0.3em] uppercase text-[#c6ff2e] border border-[#c6ff2e]/20 px-5 py-2 rounded-full bg-[#c6ff2e]/5">
-            NAWF PRESENTS
-          </span>
-        </motion.div>
+        
 
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
@@ -62,9 +53,7 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="text-lg md:text-2xl font-light text-[#f0f4f0]/70 max-w-3xl leading-relaxed"
         >
-          Where <span className="text-[#f0f4f0] font-semibold">REALITY</span> meets{" "}
-          <span className="text-[#c6ff2e] font-semibold">AI</span> — a content production
-          ecosystem built to change how brands are perceived.
+           The space between what exists and what's possible. 
         </motion.p>
 
       </div>

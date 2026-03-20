@@ -16,6 +16,16 @@ const designSections = [
       "Internal Brand Training",
     ],
     photoCount: 6,
+    images: [
+      "https://lh3.googleusercontent.com/d/1TmhbUbg8oFazqLOx5r0_BV0ub2YclnsX",
+      "https://lh3.googleusercontent.com/d/1nCAM8l2OOtkdrqkvfE09JD8FaLPiPY67",
+      "https://lh3.googleusercontent.com/d/1iT8G5PBcAXVSgsbl_OqrZRD0vBoqVQi7",
+      "https://lh3.googleusercontent.com/d/1G_MDO9ZgBTSvkjhhFFE7JWub_oJP3ejj",
+      "https://lh3.googleusercontent.com/d/1NeUebPC0gbkIc91NLeUIhy-gZF44m5t1",
+      "https://lh3.googleusercontent.com/d/1U9J6K7DR_zuIA97DKflPqpa29Xc8Bbv7",
+      "https://lh3.googleusercontent.com/d/1JkTPzNPA2Xs9Xy_dBqSfOojI41ZFuw6p",
+      "https://lh3.googleusercontent.com/d/1ZeTEmikxnlt_iyUeHQxV5JPKh-r8R6Of"
+    ],
   },
   {
     tag: "Digital",
@@ -27,6 +37,16 @@ const designSections = [
       "SEO Optimization",
     ],
     photoCount: 5,
+    images: [
+      "https://lh3.googleusercontent.com/d/1EdBX-iNkXMU0Qea9bDNoEw29hYgwtwKg",
+      "https://lh3.googleusercontent.com/d/1Yzm8bRXY-ag2oIqgzTofgf66ZLAhSAEj",
+      "https://lh3.googleusercontent.com/d/15v7neYO5cEGNFvOBsJix6cLZpahuNTIa",
+      "https://lh3.googleusercontent.com/d/1AY3JiEQh7akvlBzSdYHTZ2soPxpH_wz1",
+      "https://lh3.googleusercontent.com/d/1WRKoEy1vkmKsvClZb9jFOaXHZ2cm5a9s",
+      "https://lh3.googleusercontent.com/d/1KIkKtcne-w6ft06Y2P8wUUDVb3xBGdyl",
+      "https://lh3.googleusercontent.com/d/1xs1b_WQQugxDGUEqHnjWDtKePvydFfqN"
+    ],
+    displayMode: "grid" as "grid" | "carousel",
   },
   {
     tag: "Experiential",
@@ -40,6 +60,28 @@ const designSections = [
       "Transit Branding",
     ],
     photoCount: 6,
+    images: [
+      "https://lh3.googleusercontent.com/d/1i7UQqDVIUw1VScrUVuYNeSBjgp_TjiO2",
+      "https://lh3.googleusercontent.com/d/1O_BNW1vxheB0Dk91n9ovIcAWAvPf1I1T",
+      "https://lh3.googleusercontent.com/d/1j80rdAqfrNF8jI1vdKRNJHwb7ggZjkVh",
+      "https://lh3.googleusercontent.com/d/1wz70XvkcrWfgxYEsGcDM9BX-Fnhr4vAx",
+      "https://lh3.googleusercontent.com/d/14ygQBhMJgl1SfCV216_5A_J15pklq3ld",
+      "https://lh3.googleusercontent.com/d/1e9PnjrNhEXAIhg4VglWjpyQRorObvoI_",
+      "https://lh3.googleusercontent.com/d/1Bb__1QsMQ5mySOWgyCXC09ge3yh5exHt",
+      "https://lh3.googleusercontent.com/d/16kEHSU0rtTtgztd4jCQ_qHvDUmO9ZBGw",
+      "https://lh3.googleusercontent.com/d/1AP5oo4PEIgcdiboRUEfdQ4-9NAqTF89_",
+      "https://lh3.googleusercontent.com/d/1Xx3-KBbVdsud64eV7EiZVMCbvjAo63ob",
+      "https://lh3.googleusercontent.com/d/14GE5-AtwV_UCIHx40Wgxoivsxgrz6Nbk",
+      "https://lh3.googleusercontent.com/d/1XEcNZL-RqiX7706pgzr9wEuEvnyD88yX",
+      "https://lh3.googleusercontent.com/d/1YTk15Ydo3hdN3cVE_4y9BMQNxbTgq5ET",
+      "https://lh3.googleusercontent.com/d/12mvRnJhmk77OabhB2aggFvl8NXzKSfB1",
+      "https://lh3.googleusercontent.com/d/1NrUi-E_b5-VT5qRvVA0xymp2HgWHKoFI",
+      "https://lh3.googleusercontent.com/d/1PmCfdhdjQ9CRuBLwboXaVtIvA2FPgu_l",
+      "https://lh3.googleusercontent.com/d/1t2dzkOYFCFJVWfJGhcyLPGbi_KPrcsMl",
+      "https://lh3.googleusercontent.com/d/1GkAIJeHQGxk8Hl4ftFvy1sIM9dTrc8az",
+      "https://lh3.googleusercontent.com/d/1yA4BiGaIrDGHCTB5iz_nWQss6B66DmUe",
+      "https://lh3.googleusercontent.com/d/1Db-cbd7Hp02xm6vdMmNy1Ri7K4RotmDz",
+    ],
   },
 ];
 
@@ -60,10 +102,10 @@ function ItemCard({ label, index }: { label: string; index: number }) {
   );
 }
 
-function DesignPhotoBlock({ index, imageUrl }: { index: number; imageUrl?: string }) {
+function DesignPhotoBlock({ index, imageUrl, className }: { index: number; imageUrl?: string; className?: string }) {
   const [isFull, setIsFull] = useState(false);
   return (
-    <div className="relative aspect-[4/3] rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all flex-shrink-0 w-[260px] md:w-[380px] overflow-hidden">
+    <div className={`relative rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all overflow-hidden ${className || "aspect-[4/3] flex-shrink-0 w-[260px] md:w-[380px]"}`}>
       {imageUrl ? (
         <>
           <img src={imageUrl} alt={`Design ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
@@ -244,16 +286,26 @@ export function DesignStrategySection() {
                 {sec.items.map((item, i) => <ItemCard key={i} label={item} index={i} />)}
               </div>
             </div>
+            {"displayMode" in sec && sec.displayMode === "grid" && sec.images ? (
+              <div className="max-w-[1300px] mx-auto px-6 md:px-12 lg:px-24 mb-10">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                  {sec.images.map((url, i) => (
+                    <DesignPhotoBlock key={i} index={i} imageUrl={url} className="w-full aspect-[3/4]" />
+                  ))}
+                </div>
+              </div>
+            ) : "images" in sec && sec.images ? (
+              <div className="-mt-4">
+                <HScrollCarousel>
+                  {sec.images.map((url, i) => (
+                    <DesignPhotoBlock key={i} index={i} imageUrl={url} />
+                  ))}
+                </HScrollCarousel>
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
-
-      {/* Combined Full-bleed photo carousel */}
-      <HScrollCarousel>
-        {designPhotoUrls.map((url, i) => (
-          <DesignPhotoBlock key={i} index={i} imageUrl={url} />
-        ))}
-      </HScrollCarousel>
     </section>
   );
 }

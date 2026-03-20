@@ -67,7 +67,7 @@ export function WhatYouGetSection() {
           </div>
           <div className="max-w-sm">
             <p className="text-[#7a8c7f] text-base leading-relaxed">
-              A 360° AI-powered content arsenal built to replace every traditional production cost, bottleneck, and limitation.
+              World&apos;s first subscription-based Gen AI studio. Built on credits. Built for scale. Built different. We take real marketing problems and solve them with AI. We build production-grade AI outputs that perform.
             </p>
           </div>
         </motion.div>
@@ -89,7 +89,7 @@ export function WhatYouGetSection() {
           <div className="flex items-center gap-3 px-7 py-4 rounded-2xl border border-[#c6ff2e]/15 bg-[#c6ff2e]/5">
             <div className="w-2 h-2 rounded-full bg-[#c6ff2e] animate-pulse" />
             <span className="font-heading font-bold text-sm md:text-base text-[#c6ff2e] tracking-wider uppercase">
-              Ai 360° Content Arsenal — Central Hub
+              PRODUCTION WITHOUT PRODUCTION
             </span>
           </div>
         </motion.div>

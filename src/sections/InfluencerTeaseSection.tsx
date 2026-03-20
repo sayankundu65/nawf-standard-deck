@@ -343,7 +343,7 @@ export function InfluencerTeaseSection() {
         <ProfileCard 
           name="AIRA" 
           dob="January 01, 1998" 
-          age="26 yrs" 
+          age="28 yrs" 
           city="Mumbai" 
           height="5'8&quot;" 
           zodiac="Capricorn" 
