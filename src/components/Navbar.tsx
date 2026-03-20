@@ -63,7 +63,7 @@ export function Navbar() {
           className="flex items-center justify-center hover:opacity-70 transition-opacity"
           aria-label="Back to top"
         >
-          <Image src="/nawf-logo.png" alt="NAWF" width={52} height={52} className="object-contain brightness-0 invert" />
+          <img src="https://lh3.googleusercontent.com/d/1ys3FkxheuiIqx9qHSaxy1cjnJ1Lw0K9_" alt="NAWF" width={52} height={52} className="object-contain brightness-0 invert" />
         </motion.button>
 
         {/* Dot navigation — centered vertically */}
@@ -137,7 +137,7 @@ export function Navbar() {
           className="flex items-center justify-center hover:opacity-70 transition-opacity"
           aria-label="Back to top"
         >
-          <Image src="/nawf-logo.png" alt="NAWF" width={56} height={56} className="object-contain brightness-0 invert" />
+          <img src="https://lh3.googleusercontent.com/d/1ys3FkxheuiIqx9qHSaxy1cjnJ1Lw0K9_" alt="NAWF" width={56} height={56} className="object-contain brightness-0 invert" />
         </button>
 
         {/* Hamburger */}

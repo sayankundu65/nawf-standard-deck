@@ -190,7 +190,7 @@ function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: st
 function ProfilePhotoItem({ imageUrl, index }: { imageUrl: string, index: number }) {
   const [isFull, setIsFull] = useState(false);
   return (
-    <div className="relative aspect-square bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center overflow-hidden group">
+    <div className="relative aspect-[3/4] bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center overflow-hidden group">
       <img
         src={imageUrl}
         alt={`Photo ${index}`}
@@ -289,14 +289,14 @@ function ProfileCard({
           </div>
 
           {/* Photos */}
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {photoUrls.length > 0 ? (
               photoUrls.map((url, i) => (
                 <ProfilePhotoItem key={i} index={i} imageUrl={url} />
               ))
             ) : (
               [0,1,2,3,4,5,6,7].map(i => (
-                <div key={i} className="aspect-square bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-colors group">
+                <div key={i} className="aspect-[3/4] bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-colors group">
                   <span className="text-[7px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest group-hover:text-[#7a8c7f]/70">PHOTO</span>
                 </div>
               ))
@@ -357,7 +357,7 @@ export function InfluencerTeaseSection() {
             "tvWCB82BKGk"
           ]}
           photoUrls={[
-            "https://lh3.googleusercontent.com/d/1AFWaibrL09yASCRxjmISWzaFARhN1p3a",
+            "https://lh3.googleusercontent.com/d/1QnV6o2HkPPl_BUhxEvoIRLU0_ztAKQZB",
             "https://lh3.googleusercontent.com/d/1dGr5DCcMiELZeP1zjO0nQ1kxpRqZtWW9",
             "https://lh3.googleusercontent.com/d/1_5907zw-j1sPYHqPYEgO2ViORtKDNj_x",
             "https://lh3.googleusercontent.com/d/1PadOd02v6zXwDG5wwTfw7YIJjFklz5Lj",
@@ -367,7 +367,6 @@ export function InfluencerTeaseSection() {
             "https://lh3.googleusercontent.com/d/1Wgh0Tt2yHys9hvfTrTWsp9UegVpt6vOn",
             "https://lh3.googleusercontent.com/d/1_W4fs9np16rJFxZPSQ6GCR-2w62MNQbH",
             "https://lh3.googleusercontent.com/d/18iZ3PuZ8bUzQHnhp14vmLBzpc7REemsa",
-            "https://lh3.googleusercontent.com/d/1q7A7ZmrlTmvTh50PZWUb6zudmajNES-w",
             "https://lh3.googleusercontent.com/d/1VAK1BhbwKKlSwnJB7zoQWl-l0D-eQeA0",
             "https://lh3.googleusercontent.com/d/1nwF0J96eQnfM4gxgF_0_rF-VnXx-fFLd",
             "https://lh3.googleusercontent.com/d/1bL4-IvK9qRmuCQnffviqY9HqDw0KRwCG",
@@ -403,7 +402,7 @@ export function InfluencerTeaseSection() {
             "UoFRkvSYMb8"
           ]}
           photoUrls={[
-            "https://lh3.googleusercontent.com/d/1AKbY7BbDWBs-EbEwRZnNK631ihc_dYly",
+            "https://lh3.googleusercontent.com/d/1SpXAegjV1W3hmDLmY2hHD4Qi_xMcby_m",
             "https://lh3.googleusercontent.com/d/1Aw-ghqjSQWYNJsXLFzB91ojzCcZC8RRW",
             "https://lh3.googleusercontent.com/d/1NHphjXS6tOfh-6ZGrg1I1DiuguI9N1bj",
             "https://lh3.googleusercontent.com/d/10V6eM6tqHIFkBDq7rc0EfQ1XuioBzDkV",
@@ -429,7 +428,6 @@ export function InfluencerTeaseSection() {
             "https://lh3.googleusercontent.com/d/1yyyoRol3YkFDLIdTjGHxR73vYqAhJg98",
             "https://lh3.googleusercontent.com/d/1mf4YM1NIvRn7RljxkcNygzib2Aw2RE-s",
             "https://lh3.googleusercontent.com/d/1nSbMdvufEL2a4K4VzSeRkB9-VrjzvMbU",
-            "https://lh3.googleusercontent.com/d/1ygKbHgWc2BDhox1IwqLmYQ5lJ0JS9ox5",
             "https://lh3.googleusercontent.com/d/1WkFJ3LelZuyaVlpPAF946kTbtqYpnktp",
             "https://lh3.googleusercontent.com/d/1W5i_nGZfxHa5jgbBpgYE2220IiaggWV2"
           ]}
