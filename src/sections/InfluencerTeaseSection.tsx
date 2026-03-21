@@ -276,7 +276,7 @@ function ProfileCard({
         {/* Content Grid */}
         <div className="flex flex-col gap-3">
           <span className="text-[10px] font-bold tracking-[0.3em] text-[#7a8c7f] uppercase">Content Grid</span>
-          
+
           {/* Reels Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
             {videoIds.length > 0 ? (
@@ -284,7 +284,7 @@ function ProfileCard({
                 <VideoBlock9x16Compact key={i} index={i} videoId={id} />
               ))
             ) : (
-              [0,1,2,3].map(i => <VideoBlock9x16Compact key={i} index={i} />)
+              [0, 1, 2, 3].map(i => <VideoBlock9x16Compact key={i} index={i} />)
             )}
           </div>
 
@@ -295,7 +295,7 @@ function ProfileCard({
                 <ProfilePhotoItem key={i} index={i} imageUrl={url} />
               ))
             ) : (
-              [0,1,2,3,4,5,6,7].map(i => (
+              [0, 1, 2, 3, 4, 5, 6, 7].map(i => (
                 <div key={i} className="aspect-[3/4] bg-[#111c16] border border-white/5 rounded-xl flex items-center justify-center hover:border-[#c6ff2e]/20 transition-colors group">
                   <span className="text-[7px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest group-hover:text-[#7a8c7f]/70">PHOTO</span>
                 </div>
@@ -310,11 +310,10 @@ function ProfileCard({
 
 function ListCard({ label, variant = "dim" }: { label: string; variant?: "accent" | "dim" }) {
   return (
-    <div className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border transition-colors group cursor-default ${
-      variant === "accent"
+    <div className={`flex items-center gap-3 px-5 py-3.5 rounded-xl border transition-colors group cursor-default ${variant === "accent"
         ? "border-[#c6ff2e]/10 bg-[#c6ff2e]/4 hover:border-[#c6ff2e]/30 hover:bg-[#c6ff2e]/8"
         : "border-white/5 bg-[#0e1a14] hover:border-white/10 hover:bg-[#111c16]"
-    }`}>
+      }`}>
       <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${variant === "accent" ? "bg-[#c6ff2e]" : "bg-[#7a8c7f]"}`} />
       <span className={`text-sm font-medium leading-snug ${variant === "accent" ? "text-[#c6ff2e]/90" : "text-[#f0f4f0]/70"}`}>
         {label}
@@ -335,18 +334,18 @@ export function InfluencerTeaseSection() {
         <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <span className="text-xs font-bold tracking-[0.3em] uppercase text-[#c6ff2e] mb-4 block">AI Influencers</span>
           <h2 className="font-heading text-5xl md:text-7xl font-black uppercase tracking-tight text-[#f0f4f0] leading-none">
-            NAWF's<br/><span className="text-[#c6ff2e]">Influencer Tease</span>
+            NAWF's<br /><span className="text-[#c6ff2e]">Influencer Tease</span>
           </h2>
         </motion.div>
 
         {/* Profile Cards */}
-        <ProfileCard 
-          name="AIRA" 
-          dob="January 01, 1998" 
-          age="28 yrs" 
-          city="Mumbai" 
-          height="5'8&quot;" 
-          zodiac="Capricorn" 
+        <ProfileCard
+          name="AIRA"
+          dob="January 01, 1998"
+          age="28 yrs"
+          city="Mumbai"
+          height="5'8&quot;"
+          zodiac="Capricorn"
           videoIds={[
             "DdVYL-J7OMk",
             "LYvR21TJ8s8",
@@ -386,13 +385,13 @@ export function InfluencerTeaseSection() {
             "https://lh3.googleusercontent.com/d/1tOakCFktZbg5OnAloHLmUZqoBP4-_Fl_"
           ]}
         />
-        <ProfileCard 
-          name="DHAIRYA" 
-          dob="November 07, 1999" 
-          age="24 yrs" 
-          city="Delhi" 
-          height="6'0&quot;" 
-          zodiac="Scorpio" 
+        <ProfileCard
+          name="DHAIRYA"
+          dob="November 07, 1999"
+          age="26 yrs"
+          city="Delhi"
+          height="6'0&quot;"
+          zodiac="Scorpio"
           videoIds={[
             "7gZJ2MXNcK4",
             "eE5ekfo9o8c",
