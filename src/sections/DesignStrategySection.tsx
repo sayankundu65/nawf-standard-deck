@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect, Children } from "react";
 import { motion } from "framer-motion";
-import { Maximize2, X } from "lucide-react";
+import { Maximize2, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const designSections = [
   {
@@ -165,6 +165,18 @@ function HScrollCarousel({ children }: { children: React.ReactNode }) {
     el.scrollTo({ left: target, behavior: "smooth" });
   };
 
+  const scrollLeftBtn = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -scrollRef.current.clientWidth * 0.8, behavior: "smooth" });
+    }
+  };
+
+  const scrollRightBtn = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: scrollRef.current.clientWidth * 0.8, behavior: "smooth" });
+    }
+  };
+
   const maxDots = Math.min(childCount, 7);
   const dotIndices: number[] = [];
   if (childCount <= 7) {
@@ -175,14 +187,33 @@ function HScrollCarousel({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="mt-16 w-screen relative left-1/2 right-1/2 -mx-[50vw]">
+    <div className="mt-16 relative group w-full">
+      {/* Scroll Left Button - Hidden on mobile, visible on PC */}
+      <button
+        onClick={scrollLeftBtn}
+        className="hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md shadow-lg border border-white/10"
+        aria-label="Scroll Left"
+      >
+        <ChevronLeft size={24} />
+      </button>
+
       <div
         ref={scrollRef}
-        className="flex gap-5 overflow-x-auto px-6 md:px-24 pb-6 snap-x snap-mandatory"
+        className="flex gap-5 overflow-x-auto px-6 md:px-24 pb-6 snap-x snap-mandatory scroll-smooth"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
       </div>
+
+      {/* Scroll Right Button - Hidden on mobile, visible on PC */}
+      <button
+        onClick={scrollRightBtn}
+        className="hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md shadow-lg border border-white/10"
+        aria-label="Scroll Right"
+      >
+        <ChevronRight size={24} />
+      </button>
+
       {childCount > 1 && (
         <div className="flex justify-center gap-2 pt-4 pb-2">
           {dotIndices.map((dotIdx, i) => {
