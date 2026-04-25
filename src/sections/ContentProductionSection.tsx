@@ -865,8 +865,9 @@ export function ContentProductionSection() {
           "ZOCbbdVjEJg",
           "ObMVYil5qpU",
           "u40j6dH7VK8",
-          "Eroi_hhHCu0",
-          "K0aVlEFYwXc"
+          "K0aVlEFYwXc",
+          "GWx2rV4-u2o",
+          "pgBQGTb7y84"
         ].map((id, i) => <VideoBlock9x16 key={i} index={i} videoId={id} />)}
       </HScrollCarousel>
 
@@ -960,9 +961,9 @@ export function ContentProductionSection() {
         </div>
       </div>
 
-      {/* UGC Carousel */}
       <HScrollCarousel>
         {[
+          "f2T8MiqQFzg",
           "170oO5IK2Fo",
           "RNxMrdywx6k",
           "AKU_f8uszOk",
@@ -975,8 +976,8 @@ export function ContentProductionSection() {
           "-xGG2N7mAAY",
           "VTAqbFHi2gY",
           "kRLN9N1xb8k",
-          "bL9km87OIM4"
-    
+          "bL9km87OIM4",
+          "Eroi_hhHCu0"
         ].map((id, i) => <VideoBlock9x16 key={i} index={i} videoId={id} />)}
       </HScrollCarousel>
 
