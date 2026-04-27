@@ -5,7 +5,12 @@ import { Play, Pause, Volume2, VolumeX, RotateCcw, Maximize2, X } from "lucide-r
 import { claimUnmute, onUnmuteClaimed } from "../hooks/useVideoMuteSync";
 
 // ── Fullscreen Video Modal ──────────────────────────────────────────────
-function FullscreenVideoModal({ videoId, onClose }: { videoId: string; onClose: () => void }) {
+function FullscreenVideoModal({ videoId, onClose, onOpen }: { videoId: string; onClose: () => void; onOpen?: () => void }) {
+  useEffect(() => {
+    onOpen?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4" onClick={onClose}>
       <div className="relative w-full max-w-5xl aspect-video" onClick={(e) => e.stopPropagation()}>
@@ -182,7 +187,7 @@ function VideoBlock9x16Compact({ index, videoId }: { index: number; videoId?: st
           <span className="text-[8px] text-[#7a8c7f]/40 font-bold uppercase tracking-widest group-hover:text-[#7a8c7f]/70 transition-colors">REEL</span>
         )}
       </div>
-      {isFull && videoId && <FullscreenVideoModal videoId={videoId} onClose={() => setIsFull(false)} />}
+      {isFull && videoId && <FullscreenVideoModal videoId={videoId} onClose={() => { sendCmd("mute"); setIsMuted(true); setIsFull(false); }} onOpen={() => { claimUnmute("__fullscreen__"); sendCmd("mute"); setIsMuted(true); sendCmd("pauseVideo"); setIsPlaying(false); }} />}
     </>
   );
 }

@@ -24,7 +24,12 @@ function useInView(threshold = 0.3) {
 }
 
 // ── Fullscreen Video Modal ──────────────────────────────────────────────
-function FullscreenVideoModal({ videoId, onClose }: { videoId: string; onClose: () => void }) {
+function FullscreenVideoModal({ videoId, onClose, onOpen }: { videoId: string; onClose: () => void; onOpen?: () => void }) {
+  useEffect(() => {
+    onOpen?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4" onClick={onClose}>
       <div className="relative w-full max-w-5xl aspect-video" onClick={(e) => e.stopPropagation()}>
@@ -173,7 +178,7 @@ function VideoBlock16x9({ index, videoId }: { index: number; videoId?: string })
           </span>
         )}
       </motion.div>
-      {isFull && videoId && <FullscreenVideoModal videoId={videoId} onClose={() => setIsFull(false)} />}
+      {isFull && videoId && <FullscreenVideoModal videoId={videoId} onClose={() => { sendCmd("mute"); setIsMuted(true); setIsFull(false); }} onOpen={() => { claimUnmute("__fullscreen__"); sendCmd("mute"); setIsMuted(true); sendCmd("pauseVideo"); setIsPlaying(false); }} />}
     </>
   );
 }
@@ -304,7 +309,7 @@ function VideoBlock9x16({ index, videoId }: { index: number; videoId?: string })
           </span>
         )}
       </motion.div>
-      {isFull && videoId && <FullscreenVideoModal videoId={videoId} onClose={() => setIsFull(false)} />}
+      {isFull && videoId && <FullscreenVideoModal videoId={videoId} onClose={() => { sendCmd("mute"); setIsMuted(true); setIsFull(false); }} onOpen={() => { claimUnmute("__fullscreen__"); sendCmd("mute"); setIsMuted(true); sendCmd("pauseVideo"); setIsPlaying(false); }} />}
     </>
   );
 }
@@ -318,6 +323,59 @@ function PhotoBlock({ index, imageUrl }: { index: number; imageUrl?: string }) {
       viewport={{ once: true }}
       transition={{ delay: index * 0.05, duration: 0.6 }}
       className="relative aspect-[4/5] rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all flex-shrink-0 w-[220px] md:w-[280px]"
+    >
+      {imageUrl ? (
+        <>
+          <img
+            src={imageUrl}
+            alt={`Photo ${index}`}
+            className="w-full h-full object-cover rounded-2xl"
+            loading="lazy"
+            decoding="async"
+          />
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsFull(true); }}
+            className="absolute top-2 right-2 p-2 rounded-full bg-[#080f0c]/60 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md"
+          >
+            <Maximize2 size={16} />
+          </button>
+
+          {isFull && (
+            <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={() => setIsFull(false)}>
+              <img
+                src={imageUrl}
+                alt={`Photo ${index} Fullscreen`}
+                className="max-w-full max-h-full object-contain rounded-lg"
+                loading="lazy"
+                decoding="async"
+              />
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsFull(false); }}
+                className="absolute top-6 right-6 p-3 rounded-full bg-[#080f0c]/80 text-white hover:bg-[#c6ff2e] hover:text-black backdrop-blur-md transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <span className="text-[#7a8c7f]/40 font-heading font-bold text-xs uppercase tracking-widest group-hover:text-[#7a8c7f]/70 transition-colors">
+          PHOTO — {String(index + 1).padStart(2, "0")}
+        </span>
+      )}
+    </motion.div>
+  );
+}
+
+function PhotoBlock16x9({ index, imageUrl }: { index: number; imageUrl?: string }) {
+  const [isFull, setIsFull] = useState(false);
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.05, duration: 0.6 }}
+      className="relative aspect-[16/9] rounded-2xl bg-[#0e1a14] border border-white/5 flex items-center justify-center group hover:border-[#c6ff2e]/20 transition-all flex-shrink-0 w-full"
     >
       {imageUrl ? (
         <>
@@ -889,6 +947,17 @@ export function ContentProductionSection() {
             <span className="text-[#c6ff2e] font-semibold">Flurys Coffee</span>{" "}
             in Wes Anderson Style setup and story concept. Highlighting both Mrs.&nbsp;Indrani and Flurys Coffee seamlessly.
           </motion.p>
+
+          {/* Real Indrani Photos */}
+          <div className="mb-12">
+            <SectionLabel label="Real Indrani" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-6">
+              <PhotoBlock16x9 index={0} imageUrl="https://lh3.googleusercontent.com/d/1lwtFyejDZqx_jKuc9gRJl2NhyMJn-lZ3" />
+              <PhotoBlock16x9 index={1} imageUrl="https://lh3.googleusercontent.com/d/1snerFaYTc91y9RtJV1qAINQHMbRl5cPe" />
+              <PhotoBlock16x9 index={2} imageUrl="https://lh3.googleusercontent.com/d/1vJjoXkCYx11mWOngZUXsFfmuoghV7Py2" />
+              <PhotoBlock16x9 index={3} imageUrl="https://lh3.googleusercontent.com/d/1TlZOX9CdGZDfmbOietpa5W3NTMIk_yv9" />
+            </div>
+          </div>
 
           {/* All 3 videos in a single row */}
           <div>
