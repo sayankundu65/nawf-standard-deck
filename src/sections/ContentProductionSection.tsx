@@ -916,9 +916,11 @@ export function ContentProductionSection() {
         </div>
       </div>
 
-      {/* 9:16 Carousel */}
       <HScrollCarousel>
         {[
+          "DMFj5Jqsk5A",
+          "ouzaMC64xXE",
+          "nnXTkPCJA48",
           "v4XTCiX-LKg",
           "ZOCbbdVjEJg",
           "ObMVYil5qpU",
