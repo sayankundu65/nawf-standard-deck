@@ -1,6 +1,5 @@
 import { HeroSection } from "@/sections/HeroSection";
 import { WhatYouGetSection } from "@/sections/WhatYouGetSection";
-import { AutomationSection } from "@/sections/AutomationSection";
 import { ContentProductionSection } from "@/sections/ContentProductionSection";
 import { MemeMarketingSection } from "@/sections/MemeMarketingSection";
 import { InfluencerTeaseSection } from "@/sections/InfluencerTeaseSection";
@@ -12,7 +11,6 @@ export default function Home() {
     <main className="flex flex-col w-full min-h-screen relative overflow-hidden bg-background md:pl-[72px]">
       <HeroSection />
       <WhatYouGetSection />
-      <AutomationSection />
       <ContentProductionSection />
       <MemeMarketingSection />
       <InfluencerTeaseSection />
