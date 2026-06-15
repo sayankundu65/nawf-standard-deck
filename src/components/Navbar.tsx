@@ -20,24 +20,31 @@ export function Navbar() {
 
   /* ── scroll spy ── */
   useEffect(() => {
-    const observers: IntersectionObserver[] = [];
+    const handleScroll = () => {
+      let current = "hero";
+      sections.forEach(({ id }) => {
+        const el = id === "hero" ? document.querySelector("section") : document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= window.innerHeight * 0.4) {
+            current = id;
+          }
+        }
+      });
+      setActiveSection(current);
+    };
 
-    sections.forEach(({ id }) => {
-      const el = id === "hero" ? document.querySelector("section") : document.getElementById(id);
-      if (!el) return;
+    window.addEventListener("scroll", handleScroll);
+    const timeoutId = setTimeout(handleScroll, 100);
 
-      const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActiveSection(id); },
-        { threshold: 0.35 }
-      );
-      obs.observe(el);
-      observers.push(obs);
-    });
-
-    return () => observers.forEach(o => o.disconnect());
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const scrollTo = (id: string) => {
+    setActiveSection(id);
     if (id === "hero") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
