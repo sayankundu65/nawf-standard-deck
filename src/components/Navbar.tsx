@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 const sections = [
   { id: "hero",              label: "The Overlap" },
   { id: "what-you-get",     label: "What You Get" },
-  { id: "automation",       label: "Automation" },
   { id: "content-production", label: "Content Production" },
   { id: "meme-marketing",   label: "Meme Marketing" },
   { id: "influencer-tease", label: "Influencers" },
