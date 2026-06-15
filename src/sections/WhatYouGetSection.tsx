@@ -67,7 +67,7 @@ export function WhatYouGetSection() {
           </div>
           <div className="max-w-sm">
             <p className="text-[#7a8c7f] text-base leading-relaxed">
-              World&apos;s first subscription-based Gen AI studio. Built on credits. Built for scale. Built different. We take real marketing problems and solve them with AI. We build production-grade AI outputs that perform.
+              We help brands unlock the creative potential of AI. From breakthrough concepts to production-grade execution, we solve real marketing challenges through intelligent creativity, creating campaigns, content, and experiences designed to perform, scale, and stand apart.
             </p>
           </div>
         </motion.div>
